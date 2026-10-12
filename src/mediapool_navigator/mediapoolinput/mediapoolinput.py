@@ -1,23 +1,97 @@
+from __future__ import annotations
 import logging, typing
 
-from resolvecommon.session import bmd, resolve, fusion
-from ..utils import folders
+if typing.TYPE_CHECKING:
+	import DaVinciResolveScript as dvr
+
+from .. import resolve
+from ..utils import folders, formatting
 from .callbacks import MPICallbacks
 
-logger     = logging.getLogger(__name__)
+_logger     = logging.getLogger(__name__)
 
-ui         = fusion.UIManager
-dispatcher = bmd.UIDispatcher(ui)
+class MPIFolderInfo:
+	"""Path and subfolder info for a given folder"""
+
+	def __init__(self, ):
+
+		self._folder_handle:dvr.Folder|None = None
+		self._folder_path:str   = ""
+
+	def _set_folder(self, folder:dvr.Folder) -> bool:
+		"""Set the current folder.  Returns `True` if the folder changed since last."""
+
+		if self._folder_handle and self._folder_handle.GetUniqueId() == folder.GetUniqueId():
+
+			_logger.debug("Set current folder ignored because unchanged")
+			return False
+
+		self._folder_handle = folder
+		self._folder_path   = folders.get_path_from_folder(folder)
+
+		return True
+
+	def _set_folder_path(self, folder_path:str) -> bool:
+		"""Set the current folder from a given path string.  Returns `True` if the folder changed since last."""
+
+		if self._folder_path == folder_path:
+			return False
+		
+		root_folder = resolve.GetProjectManager().GetCurrentProject().GetMediaPool().GetRootFolder()
+		
+		self._folder_handle = folders.get_folder_from_path(folder_path, root_folder)
+		self._folder_path   = self._folder_path
+
+		return True
+
+	def _clear_folder(self) -> bool:
+		"""Clear the current folder.  Returns `True` if this is a change."""
+
+		if not self._folder_handle:
+			return False
+
+		self._folder_handle = None
+		self._folder_path   = ""
+
+		return True
+
+	def folder_handle(self) -> dvr.Folder|None:
+		"""The current folder handle"""
+
+		return self._folder_handle
+
+	def folder_path(self) -> str:
+		"""The current folder"""
+
+		return self._folder_path
+
+	def folder_is_valid(self) -> bool:
+		"""Pointing to a valid folder path"""
+
+		return bool(self._folder_handle)
+
+	def subfolder_handles(self) -> list[dvr.Folder]:
+		"""List of available subfolder handles"""
+
+		return sorted(
+			self._folder_handle.GetSubFolderList(),
+			key = lambda f: formatting.format_string_for_natural_sort(f.GetName())
+		) if self.folder_is_valid() else []
+
+	def subfolder_paths(self) -> list[str]:
+		"""List of available subfolder paths"""
+
+		return [self.folder_path() + "/" + f.GetName() for f in self.subfolder_handles()]
+		
 
 class MPILineEditController:
 
 	def __init__(self, line_edit:object):
 
+		self._folder_tracker   = MPIFolderInfo()
+
 		self._line_edit        = line_edit
 		self._last_edit_length = len(self._line_edit.Text)
-
-		self._last_folder_uid  = ""
-		self._last_subfolders  = list[object]
 
 		self._callbacks:dict[MPICallbacks, list[typing.Callable]] = dict()
 
@@ -32,15 +106,20 @@ class MPILineEditController:
 
 		window_handle.On[self._line_edit.ID].TextEdited       = self._on_user_modified_path
 		window_handle.On[self._line_edit.ID].EditingFinished  = self._on_user_finished_path
-#		window_handle.On[self._line_edit.ID].SelectionChanged = self._on_selection_changed
+
+	def current_folder_info(self) -> MPIFolderInfo:
+		"""Info about the current base folder"""
+
+		return self._folder_tracker
 
 	def set_path_from_folder(self, folder:object):
 		"""Set the current path from a given media pool folder object"""
 
-		folder_path    = folders.get_path_from_folder(folder)
+		self._folder_tracker._set_folder(folder)
+
+		folder_path = self._folder_tracker.folder_path()
 		formatted_path = "" if folder_path == "/Master" else folder_path[len("/Master/"):]
 
-		self._set_current_folder(folder)
 		self.set_path_from_text("", formatted_path)
 
 	def set_path_from_text(self, base_text:str, autocomplete_text:str=""):
@@ -51,9 +130,10 @@ class MPILineEditController:
 
 		self._last_edit_length = len(base_text)
 
-		logger.debug("Edit length set to ", self._last_edit_length)
+		_logger.debug("Edit length set to %s", self._last_edit_length)
 
 	def register_callback(self, callback:MPICallbacks, callback_function:typing.Callable):
+		"""Register a callback function"""
 
 		self._callbacks[callback].append(callback_function)
 
@@ -61,29 +141,6 @@ class MPILineEditController:
 
 		for cb in self._callbacks[callback]:
 			cb(args)
-
-	def _set_current_folder(self, folder:object|None):
-
-		folder_uid = folder.GetUniqueId() if folder else None
-
-		if folder_uid == self._last_folder_uid:
-			return
-
-		self._last_folder_uid = folder_uid
-		self._last_subfolders = sorted(folder.GetSubFolderList(), key=lambda f: f.GetName()) if folder else []
-
-		logger.debug("Changed folder to %s", folder.GetName() if folder else "[None]")
-
-		self._send_callback(MPICallbacks.CURRENT_FOLDER_CHANGED, folder)
-		
-		# NOTE: Kinda double-fires
-		self._send_callback(MPICallbacks.SUBFOLDERS_CHANGED, self._last_subfolders)
-
-	def _on_selection_changed(self, event:dict):
-
-		# NOTE: Not in use
-		# User selection should probably break autocomplete
-		self._last_edit_length = len(self._line_edit.Text)
 	
 	def _on_user_finished_path(self, event:dict):
 		"""Reformat/standardize user input"""
@@ -111,23 +168,23 @@ class MPILineEditController:
 
 		try:
 
-			root_folder = resolve.GetProjectManager().GetCurrentProject().GetMediaPool().GetRootFolder()
-			base_folder = folders.get_folder_from_path(base_path, root_folder)
-
-			self._set_current_folder(base_folder)
+			if self._folder_tracker._set_folder_path(base_path):
+				self._send_callback(MPICallbacks.CURRENT_FOLDER_CHANGED, self._folder_tracker.folder_handle())
 
 			filtered_subfolders = list(
-				filter(lambda f: f.GetName().startswith(partial_folder_name), self._last_subfolders)
+				filter(lambda f: f.GetName().startswith(partial_folder_name), self._folder_tracker.subfolder_handles())
 			)
 	
 		except FileNotFoundError as e:
 			
-			logger.error("Invalid media pool folder: %s", e)
+			_logger.error("Invalid media pool folder: %s", e)
 			
-			self._set_current_folder(None)
+			if self._folder_tracker._clear_folder():
+				self._send_callback(MPICallbacks.CURRENT_FOLDER_CHANGED, None)
+
 			filtered_subfolders = []
 		
-		self._send_callback(MPICallbacks.SUBFOLDERS_CHANGED, filtered_subfolders)
+		self._send_callback(MPICallbacks.FILTERED_SUBFOLDERS_CHANGED, filtered_subfolders)
 
 		# If the user is editing text (either backspacin' or editing in the middle), don't autocomplete
 		if any([
@@ -140,10 +197,10 @@ class MPILineEditController:
 #				logger.debug("Because no subfolders")
 			
 			if current_edit_length <= self._last_edit_length:
-				logger.debug("Because edit length: current_length=%s, last_length=%s", current_edit_length, self._last_edit_length)
+				_logger.debug("Because edit length: current_length=%s, last_length=%s", current_edit_length, self._last_edit_length)
 			
 			if self._line_edit.CursorPosition < current_edit_length:
-				logger.debug("Because cursor position")
+				_logger.debug("Because cursor position")
 
 			self._last_edit_length = current_edit_length
 			return
