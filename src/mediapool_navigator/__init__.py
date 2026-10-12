@@ -1,6 +1,6 @@
 import logging
 
-__VERSION__ = "0.3-dev"
+__VERSION__ = "0.3"
 URL_GITHUB  = "https://github.com/mjiggidy/resolve_mediapool_navigator/"
 
 if not "bmd" in globals():
