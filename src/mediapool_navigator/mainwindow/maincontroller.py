@@ -22,12 +22,35 @@ class MPNMainController:
 		self._media_pool_input_controller = mediapoolinput.MPILineEditController(self._main_widget.media_pool_path_editor())
 		self._folder_list_controller      = folderlistcontroller.MPNFolderListController(self._main_widget.subfolder_list_view())
 
-		self._media_pool_input_controller.register_callback(callbacks.MPICallbacks.FILTERED_SUBFOLDERS_CHANGED, self._folder_list_controller.set_folder_list)
+		#self._media_pool_input_controller.register_callback(callbacks.MPICallbacks.FILTERED_SUBFOLDERS_CHANGED, self._folder_list_controller.set_folder_list)
+		self._media_pool_input_controller.register_callback(callbacks.MPICallbacks.CURRENT_FOLDER_CHANGED, self._test_set_combo_options)
+
+		self._combo_options:list[str] = []
 
 		start_folder = resolve.GetProjectManager().GetCurrentProject().GetMediaPool().GetCurrentFolder()
 
 		if start_folder:
-			self._media_pool_input_controller.set_path_from_folder(start_folder)
+
+			self.set_ready(False)
+			try:
+				self._media_pool_input_controller.set_path_from_folder(start_folder)
+			except Exception as e:
+				print(e)
+			self.set_ready(True)
+
+	def _test_set_combo_options(self, folder):
+
+		if self._combo_options == self._media_pool_input_controller.current_folder_info().subfolder_paths():
+			return
+
+		user_text = self._main_widget.media_pool_path_editor().Text
+
+		self._combo_options = self._media_pool_input_controller.current_folder_info().subfolder_paths()
+
+		self._main_widget.media_pool_path_combo().Clear()
+		self._main_widget.media_pool_path_combo().AddItems(self._combo_options)
+
+		self._main_widget.media_pool_path_editor().Text = user_text
 
 	def register_window_handle(self, window_handle:object):
 
@@ -96,7 +119,7 @@ class MPNMainController:
 	def set_ready(self, is_ready:bool=True):
 
 		self._main_widget.button_use_current().Enabled    = is_ready
-		self._main_widget.media_pool_path_input().Enabled = is_ready
+		self._main_widget.media_pool_path_combo().Enabled = is_ready
 		self._main_widget.subfolder_list_view().Enabled   = is_ready
 
 	def set_info_label(self, /, version_string:str, github_url:str):

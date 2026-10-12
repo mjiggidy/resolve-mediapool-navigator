@@ -13,7 +13,7 @@ def main():
 	wnd_main = dispatcher.AddWindow({
 			"ID": mainwidget.ID_WINDOW_MAIN,
 			"WindowTitle": "Media Pool Navigator Pro!",
-			"FixedSize": [500,140],
+			"FixedSize": [500,90],
 			"Events": {"Close": True},
 		}, [main_widget.layout()])
 
@@ -23,7 +23,12 @@ def main():
 
 	wnd_main.Show()
 
-	dispatcher.RunLoop()
+	
+	try:
+		dispatcher.RunLoop()
+	except Exception as e:
+		dispatcher.ExitLoop(1)
+		raise e
 
 
 if __name__ == "__main__":

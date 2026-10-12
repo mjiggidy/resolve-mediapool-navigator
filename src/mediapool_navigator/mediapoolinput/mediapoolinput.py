@@ -39,8 +39,12 @@ class MPIFolderInfo:
 		
 		root_folder = resolve.GetProjectManager().GetCurrentProject().GetMediaPool().GetRootFolder()
 		
-		self._folder_handle = folders.get_folder_from_path(folder_path, root_folder)
-		self._folder_path   = self._folder_path
+		try:
+			self._folder_handle = folders.get_folder_from_path(folder_path, root_folder)
+		except FileNotFoundError:
+			return self._clear_folder()
+		
+		self._folder_path   = folder_path
 
 		return True
 
@@ -63,7 +67,7 @@ class MPIFolderInfo:
 	def folder_path(self) -> str:
 		"""The current folder"""
 
-		return self._folder_path
+		return self._folder_path.lstrip()
 
 	def folder_is_valid(self) -> bool:
 		"""Pointing to a valid folder path"""
@@ -81,7 +85,11 @@ class MPIFolderInfo:
 	def subfolder_paths(self) -> list[str]:
 		"""List of available subfolder paths"""
 
-		return [self.folder_path() + "/" + f.GetName() for f in self.subfolder_handles()]
+#		print("Folder path is ", self.folder_path(), "For base folder", self.folder_handle().GetName())
+
+		print("Folder path:", self.folder_path())
+
+		return [str(self.folder_path() + "/" + f.GetName()).lstrip("/") for f in self.subfolder_handles()]
 		
 
 class MPILineEditController:

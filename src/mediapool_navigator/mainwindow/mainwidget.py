@@ -54,6 +54,7 @@ class MPNMainWindow(MPNAbstractWidget):
 
 		self._tree_subfolders = self._ui.Tree({
 			"ID": ID_TREE_SUBFOLDERS,
+			"Hidden": True,
 			"AlternatingRowColors":True,
 			"RootIsDecorated": False,
 			"HeaderHidden":True,
@@ -93,7 +94,13 @@ class MPNMainWindow(MPNAbstractWidget):
 					self._btn_set_current,
 				]
 			),
-			self._tree_subfolders,
+			
+			self._ui.VGap(),
+			
+			self._ui.Label({
+				"Weight":0,
+				"FrameStyle": 4,
+			}),
 
 			self._ui.HGroup({
 				"Weight": 0,
