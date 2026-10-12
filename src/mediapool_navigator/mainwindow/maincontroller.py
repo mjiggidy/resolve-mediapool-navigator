@@ -6,7 +6,7 @@ from .. import __VERSION__, URL_GITHUB
 from ..folderlist import folderlistcontroller
 from ..mediapoolinput import mediapoolinput, callbacks
 
-from resolvecommon.session import resolve
+from .. import resolve
 
 from ..utils import folders
 
@@ -43,14 +43,14 @@ class MPNMainController:
 	def _on_folder_clicked(self, event:dict):
 
 		index = self._main_widget.subfolder_list_view().IndexOfTopLevelItem(event["item"])
-		folder = self._media_pool_input_controller.current_folder_info().subfolders()[index]
+		folder = self._media_pool_input_controller.current_folder_info().subfolder_handles()[index]
 		self._media_pool_input_controller.set_path_from_folder(folder)
 
 	def _on_folder_chosen(self, event:dict):
 
 		index = self._main_widget.subfolder_list_view().IndexOfTopLevelItem(event["item"])
 
-		folder = self._media_pool_input_controller.current_folder_info().subfolders()[index]
+		folder = self._media_pool_input_controller.current_folder_info().subfolder_handles()[index]
 		self._media_pool_input_controller.set_path_from_folder(folder)
 		mp = resolve.GetProjectManager().GetCurrentProject().GetMediaPool()
 		mp.SetCurrentFolder(folder)
