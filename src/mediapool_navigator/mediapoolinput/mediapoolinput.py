@@ -184,7 +184,7 @@ class MPILineEditController:
 
 			filtered_subfolders = []
 		
-		self._send_callback(MPICallbacks.SUBFOLDERS_CHANGED, filtered_subfolders)
+		self._send_callback(MPICallbacks.FILTERED_SUBFOLDERS_CHANGED, filtered_subfolders)
 
 		# If the user is editing text (either backspacin' or editing in the middle), don't autocomplete
 		if any([

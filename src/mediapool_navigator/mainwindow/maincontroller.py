@@ -22,7 +22,7 @@ class MPNMainController:
 		self._media_pool_input_controller = mediapoolinput.MPILineEditController(self._main_widget.media_pool_path_input())
 		self._folder_list_controller      = folderlistcontroller.MPNFolderListController(self._main_widget.subfolder_list_view())
 
-		self._media_pool_input_controller.register_callback(callbacks.MPICallbacks.SUBFOLDERS_CHANGED, self._folder_list_controller.set_folder_list)
+		self._media_pool_input_controller.register_callback(callbacks.MPICallbacks.FILTERED_SUBFOLDERS_CHANGED, self._folder_list_controller.set_folder_list)
 
 		start_folder = resolve.GetProjectManager().GetCurrentProject().GetMediaPool().GetCurrentFolder()
 
