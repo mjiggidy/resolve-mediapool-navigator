@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from . import mainwidget
 
-from .. import __VERSION__, URL_GITHUB
+from .. import __VERSION__, URL_GITHUB, URL_DONATE
 from ..folderlist import folderlistcontroller
 from ..mediapoolinput import mediapoolinput, callbacks
 
@@ -17,13 +17,13 @@ class MPNMainController:
 
 		self._main_widget = main_widget
 
-		self.set_info_label(version_string=__VERSION__, github_url=URL_GITHUB)
+		self.set_info_label(version_string=__VERSION__, github_url=URL_GITHUB, donate_url=URL_DONATE)
 
 		self._media_pool_input_controller = mediapoolinput.MPILineEditController(self._main_widget.media_pool_path_editor())
 		self._folder_list_controller      = folderlistcontroller.MPNFolderListController(self._main_widget.subfolder_list_view())
 
 		#self._media_pool_input_controller.register_callback(callbacks.MPICallbacks.FILTERED_SUBFOLDERS_CHANGED, self._folder_list_controller.set_folder_list)
-		self._media_pool_input_controller.register_callback(callbacks.MPICallbacks.CURRENT_FOLDER_CHANGED, self._test_set_combo_options)
+		self._media_pool_input_controller.current_folder_info().register_callback(callbacks.MPICallbacks.CURRENT_FOLDER_CHANGED, self._test_set_combo_options)
 
 		self._combo_options:list[str] = []
 
@@ -122,6 +122,14 @@ class MPNMainController:
 		self._main_widget.media_pool_path_combo().Enabled = is_ready
 		self._main_widget.subfolder_list_view().Enabled   = is_ready
 
-	def set_info_label(self, /, version_string:str, github_url:str):
+	def set_info_label(self, /, version_string:str, github_url:str, donate_url:str=""):
 
-		self._main_widget.info_label().Text = f"v{version_string} | <a href=\"{github_url}\">Github"
+		parts = [
+			f"v{version_string}",
+			f"<a href=\"{github_url}\">Github</a>",
+		]
+
+		if donate_url:
+			parts.append(f"<a href=\"{donate_url}\">Donate</a>")
+
+		self._main_widget.info_label().Text = " | ".join(parts)

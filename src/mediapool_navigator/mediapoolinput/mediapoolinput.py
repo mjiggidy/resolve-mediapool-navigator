@@ -18,6 +18,12 @@ class MPIFolderInfo:
 		self._folder_handle:dvr.Folder|None = None
 		self._folder_path:str   = ""
 
+		self._callbacks:dict[MPICallbacks, list[typing.Callable]] = dict()
+
+		# Register callback types
+		for callback in MPICallbacks:
+			self._callbacks[callback] = []
+
 	def _set_folder(self, folder:dvr.Folder) -> bool:
 		"""Set the current folder.  Returns `True` if the folder changed since last."""
 
@@ -26,8 +32,10 @@ class MPIFolderInfo:
 			_logger.debug("Set current folder ignored because unchanged")
 			return False
 
-		self._folder_handle = folder
 		self._folder_path   = folders.get_path_from_folder(folder)
+		self._folder_handle = folder
+
+		self._send_callback(MPICallbacks.CURRENT_FOLDER_CHANGED, folder)
 
 		return True
 
@@ -39,12 +47,10 @@ class MPIFolderInfo:
 		
 		root_folder = resolve.GetProjectManager().GetCurrentProject().GetMediaPool().GetRootFolder()
 		
-		try:
-			self._folder_handle = folders.get_folder_from_path(folder_path, root_folder)
-		except FileNotFoundError:
-			return self._clear_folder()
-		
-		self._folder_path   = folder_path
+		self._folder_handle = folders.get_folder_from_path(folder_path, root_folder)
+		self._folder_path = folder_path
+
+		self._send_callback(MPICallbacks.CURRENT_FOLDER_CHANGED, self._folder_handle)
 
 		return True
 
@@ -57,6 +63,8 @@ class MPIFolderInfo:
 		self._folder_handle = None
 		self._folder_path   = ""
 
+		self._send_callback(MPICallbacks.CURRENT_FOLDER_CHANGED, self._folder_handle)
+
 		return True
 
 	def folder_handle(self) -> dvr.Folder|None:
@@ -67,7 +75,7 @@ class MPIFolderInfo:
 	def folder_path(self) -> str:
 		"""The current folder"""
 
-		return self._folder_path.lstrip()
+		return self._folder_path
 
 	def folder_is_valid(self) -> bool:
 		"""Pointing to a valid folder path"""
@@ -90,6 +98,16 @@ class MPIFolderInfo:
 		print("Folder path:", self.folder_path())
 
 		return [str(self.folder_path() + "/" + f.GetName()).lstrip("/") for f in self.subfolder_handles()]
+
+	def register_callback(self, callback:MPICallbacks, callback_function:typing.Callable):
+		"""Register a callback function"""
+
+		self._callbacks[callback].append(callback_function)
+
+	def _send_callback(self, callback:MPICallbacks, args:typing.Any=None):
+
+		for cb in self._callbacks[callback]:
+			cb(args)
 		
 
 class MPILineEditController:
@@ -100,12 +118,6 @@ class MPILineEditController:
 
 		self._line_edit        = line_edit
 		self._last_edit_length = len(self._line_edit.Text)
-
-		self._callbacks:dict[MPICallbacks, list[typing.Callable]] = dict()
-
-		# Register callback types
-		for callback in MPICallbacks:
-			self._callbacks[callback] = []
 
 	def register_window_handle(self, window_handle:object):
 		"""Register `TextEdited` event with dispatcher window handle"""
@@ -139,16 +151,6 @@ class MPILineEditController:
 		self._last_edit_length = len(base_text)
 
 		_logger.debug("Edit length set to %s", self._last_edit_length)
-
-	def register_callback(self, callback:MPICallbacks, callback_function:typing.Callable):
-		"""Register a callback function"""
-
-		self._callbacks[callback].append(callback_function)
-
-	def _send_callback(self, callback:MPICallbacks, args:typing.Any=None):
-
-		for cb in self._callbacks[callback]:
-			cb(args)
 	
 	def _on_user_finished_path(self, event:dict):
 		"""Reformat/standardize user input"""
@@ -175,24 +177,16 @@ class MPILineEditController:
 		# list so we don't autocomplete anything atoll, and any subfolder listings are cleared out
 
 		try:
-
-			if self._folder_tracker._set_folder_path(base_path):
-				self._send_callback(MPICallbacks.CURRENT_FOLDER_CHANGED, self._folder_tracker.folder_handle())
-
-			filtered_subfolders = list(
-				filter(lambda f: f.GetName().startswith(partial_folder_name), self._folder_tracker.subfolder_handles())
-			)
+			self._folder_tracker._set_folder_path(base_path)
 	
 		except FileNotFoundError as e:
 			
 			_logger.error("Invalid media pool folder: %s", e)
-			
-			if self._folder_tracker._clear_folder():
-				self._send_callback(MPICallbacks.CURRENT_FOLDER_CHANGED, None)
+			self._folder_tracker._clear_folder()
 
-			filtered_subfolders = []
-		
-		self._send_callback(MPICallbacks.FILTERED_SUBFOLDERS_CHANGED, filtered_subfolders)
+		filtered_subfolders = list(
+			filter(lambda f: f.GetName().startswith(partial_folder_name), self._folder_tracker.subfolder_handles())
+		)
 
 		# If the user is editing text (either backspacin' or editing in the middle), don't autocomplete
 		if any([
