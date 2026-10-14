@@ -1,12 +1,8 @@
-import logging
-
-__VERSION__ = "0.3"
+__VERSION__ = "0.4-dev"
 URL_GITHUB  = "https://github.com/mjiggidy/resolve_mediapool_navigator/"
+URL_DONATE  = "https://ko-fi.com/lilbinboy/"
 
-if not "bmd" in globals():
-
-	logging.getLogger(__name__).debug("Importing `DaVinciResolveScript`")
-	import DaVinciResolveScript as bmd
+from resolvecommon.session import bmd
 
 resolve    = bmd.scriptapp("resolve")
 fusion     = bmd.scriptapp("fusion")
