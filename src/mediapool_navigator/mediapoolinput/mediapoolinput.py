@@ -45,7 +45,7 @@ class _MPIFolderInfo:
 		"""Format folder string for display"""
 
 		if self.EXCLUDE_MASTER and folder_path_raw.startswith("/Master"):
-			return "" if folder_path_raw == "/Master" else folder_path_raw[len("/Master/"):]
+			return folder_path_raw[len("/Master/"):]
 
 		else:
 			return folder_path_raw

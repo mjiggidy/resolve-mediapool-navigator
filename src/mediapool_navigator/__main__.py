@@ -20,6 +20,7 @@ def main():
 	wnd_main.On[mainwidget.ID_WINDOW_MAIN].Close = _on_main_closed
 
 	app.register_window_handle(wnd_main)
+	wnd_main.RecalcLayout()
 
 	wnd_main.Show()
 
