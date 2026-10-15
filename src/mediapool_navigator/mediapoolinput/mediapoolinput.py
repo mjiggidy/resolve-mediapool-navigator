@@ -10,8 +10,10 @@ from .callbacks import MPICallbacks
 
 _logger     = logging.getLogger(__name__)
 
-class MPIFolderInfo:
+class _MPIFolderInfo:
 	"""Path and subfolder info for a given folder"""
+
+	EXCLUDE_MASTER = True
 
 	def __init__(self, ):
 
@@ -32,12 +34,21 @@ class MPIFolderInfo:
 			_logger.debug("Set current folder ignored because unchanged")
 			return False
 
-		self._folder_path   = folders.get_path_from_folder(folder)
+		self._folder_path   = self._format_folder_path(folders.get_path_from_folder(folder))
 		self._folder_handle = folder
 
 		self._send_callback(MPICallbacks.CURRENT_FOLDER_CHANGED, folder)
 
 		return True
+
+	def _format_folder_path(self, folder_path_raw:str) -> str:
+		"""Format folder string for display"""
+
+		if self.EXCLUDE_MASTER and folder_path_raw.startswith("/Master"):
+			return "" if folder_path_raw == "/Master" else folder_path_raw[len("/Master/"):]
+
+		else:
+			return folder_path_raw
 
 	def _set_folder_path(self, folder_path:str) -> bool:
 		"""Set the current folder from a given path string.  Returns `True` if the folder changed since last."""
@@ -48,7 +59,7 @@ class MPIFolderInfo:
 		root_folder = resolve.GetProjectManager().GetCurrentProject().GetMediaPool().GetRootFolder()
 		
 		self._folder_handle = folders.get_folder_from_path(folder_path, root_folder)
-		self._folder_path = folder_path
+		self._folder_path   = self._format_folder_path(folder_path)
 
 		self._send_callback(MPICallbacks.CURRENT_FOLDER_CHANGED, self._folder_handle)
 
@@ -114,7 +125,7 @@ class MPILineEditController:
 
 	def __init__(self, line_edit:object):
 
-		self._folder_tracker   = MPIFolderInfo()
+		self._folder_tracker   = _MPIFolderInfo()
 
 		self._line_edit        = line_edit
 		self._last_edit_length = len(self._line_edit.Text)
@@ -127,7 +138,7 @@ class MPILineEditController:
 		window_handle.On[self._line_edit.ID].TextEdited       = self._on_user_modified_path
 		window_handle.On[self._line_edit.ID].EditingFinished  = self._on_user_finished_path
 
-	def current_folder_info(self) -> MPIFolderInfo:
+	def current_folder_info(self) -> _MPIFolderInfo:
 		"""Info about the current base folder"""
 
 		return self._folder_tracker
@@ -138,9 +149,8 @@ class MPILineEditController:
 		self._folder_tracker._set_folder(folder)
 
 		folder_path = self._folder_tracker.folder_path()
-		formatted_path = "" if folder_path == "/Master" else folder_path[len("/Master/"):]
 
-		self.set_path_from_text("", formatted_path)
+		self.set_path_from_text("", folder_path)
 
 	def set_path_from_text(self, base_text:str, autocomplete_text:str=""):
 		"""Set the current path from text"""
