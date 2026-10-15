@@ -6,7 +6,7 @@ ID_CMB_PATH        = "cmb_mediapool_path"
 ID_TXT_PATH        = "txt_mediapool_path"
 ID_BTN_GO          = "btn_go"
 ID_BTN_SET_CURRENT = "btn_set_current"
-ID_TREE_SUBFOLDERS = "tree_subfolders"
+ID_TREE_BOOKMARKS = "tree_subfolders"
 
 class MPNMainWindow(MPNAbstractWidget):
 
@@ -52,9 +52,9 @@ class MPNMainWindow(MPNAbstractWidget):
 			"Events": {"Clicked": True},
 		})
 
-		self._tree_subfolders = self._ui.Tree({
-			"ID": ID_TREE_SUBFOLDERS,
-			"Hidden": True,
+		self._tree_bookmarks = self._ui.Tree({
+			"ID": ID_TREE_BOOKMARKS,
+			#"Hidden": True,
 			"AlternatingRowColors":True,
 			"RootIsDecorated": False,
 			"HeaderHidden":True,
@@ -94,14 +94,16 @@ class MPNMainWindow(MPNAbstractWidget):
 					self._btn_set_current,
 				]
 			),
-			
-			self._ui.VGap(),
-			
-			self._ui.Label({
-				"Weight":0,
-				"FrameStyle": 4,
-			}),
 
+			self._tree_bookmarks,
+			
+#			self._ui.VGap(),
+			
+#			self._ui.Label({
+#				"Weight":0,
+#				"FrameStyle": 4,
+#			}),
+#
 			self._ui.HGroup({
 				"Weight": 0,
 			},[
@@ -120,10 +122,10 @@ class MPNMainWindow(MPNAbstractWidget):
 
 		return self._cmb_media_pool_path
 
-	def subfolder_list_view(self) -> object:
+	def bookmark_list_view(self) -> object:
 		"""The subfolder `Tree` view"""
 
-		return self._tree_subfolders
+		return self._tree_bookmarks
 
 	def button_use_current(self) -> object:
 		"""The "Use Current" `Button`"""
