@@ -6,7 +6,7 @@ if typing.TYPE_CHECKING:
 
 from .. import resolve
 from ..utils import folders, formatting
-from .mpcallbacks import MPILineEditCallbacks
+from .callbacks import MPILineEditCallbacks
 
 _logger     = logging.getLogger(__name__)
 
