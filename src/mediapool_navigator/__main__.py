@@ -14,9 +14,12 @@ def main():
 			"Bookmarks" : app.bookmarks_controller().folder_paths()
 		}
 
-		with open(PATH_SETTINGS, "w") as handle_settings:
-
-			json.dump(settings, handle_settings, indent="\t")
+		try:
+			with open(PATH_SETTINGS, "w") as handle_settings:
+				json.dump(settings, handle_settings, indent="\t")
+		
+		except Exception as e:
+			print("Error writing settings: ", e, file=sys.stderr)
 
 		dispatcher.ExitLoop(0)
 	
