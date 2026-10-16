@@ -24,11 +24,24 @@ class MPIBookmarkManager:
 
 	def add_folder_path(self, folder_path:str):
 
-		new_item = self._tree_bookmarks.NewItem()
+		if folder_path not in self.folder_paths():
 
-		new_item.Text[0] = folder_path
+			new_item = self._tree_bookmarks.NewItem()
+			new_item.Text[0] = folder_path
+			self._tree_bookmarks.InsertTopLevelItem(0, new_item)
 
-		self._tree_bookmarks.AddTopLevelItem(new_item)
+		self.select_folder_path(folder_path)
+
+	def select_folder_path(self, folder_path:str):
+
+		for item in (self._tree_bookmarks.TopLevelItem(idx) for idx in range(self._tree_bookmarks.TopLevelItemCount())):
+
+			item.Selected = item.Text[0] == folder_path
+
+	def folder_paths(self) -> list[str]:
+		"""A list of current folder paths"""
+
+		return [self._tree_bookmarks.TopLevelItem(idx).Text[0] for idx in range(self._tree_bookmarks.TopLevelItemCount())]
 
 	def _on_folder_clicked(self, event:dict):
 
