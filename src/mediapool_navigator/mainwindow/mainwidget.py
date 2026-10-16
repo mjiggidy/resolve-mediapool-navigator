@@ -6,7 +6,8 @@ ID_CMB_PATH        = "cmb_mediapool_path"
 ID_TXT_PATH        = "txt_mediapool_path"
 ID_BTN_GO          = "btn_go"
 ID_BTN_SET_CURRENT = "btn_set_current"
-ID_TREE_SUBFOLDERS = "tree_subfolders"
+ID_BTN_SAVE_BOOKMARK = "btn_save_bookmark"
+ID_TREE_BOOKMARKS = "tree_subfolders"
 
 class MPNMainWindow(MPNAbstractWidget):
 
@@ -15,6 +16,7 @@ class MPNMainWindow(MPNAbstractWidget):
 		super().__init__(ui_manager)
 
 		font_about = self._ui.Font({"PointSize": 10})
+		toolbutton_size = [40,20]
 
 		self._lbl_master = self._ui.Label({
 			"Weight": 0,
@@ -23,7 +25,7 @@ class MPNMainWindow(MPNAbstractWidget):
 
 		self._txt_media_pool_path = self._ui.LineEdit({
 			"ID": ID_TXT_PATH,
-			"PlaceholderText": "Media Pool Thing",
+			"PlaceholderText": "Start typing a Media Pool path here",
 			"Events": {
 				"TextEdited": True,
 				"EditingFinished": True,
@@ -37,24 +39,27 @@ class MPNMainWindow(MPNAbstractWidget):
 			"LineEdit": self._txt_media_pool_path # AHAHAHAHAHA IT WORKED AHAHAHAHAA AAAAAAHAHAHHAAAAA
 		})
 
-		self._btn_go = self._ui.Button({
-			"ID": ID_BTN_GO,
-			"Visible": False,
-			"Weight": 0,
-			"Text": "Go",
-			"Events": {"Clicked", True},
-		})
-
 		self._btn_set_current = self._ui.Button({
 			"ID": ID_BTN_SET_CURRENT,
 			"Weight": 0,
-			"Text": "Use Current",
+			"Text": "◉",
+			"ToolTip": "Use Current Folder",
+			"FixedSize": toolbutton_size,
 			"Events": {"Clicked": True},
 		})
 
-		self._tree_subfolders = self._ui.Tree({
-			"ID": ID_TREE_SUBFOLDERS,
-			"Hidden": True,
+		self._btn_save_bookmark = self._ui.Button({
+			"ID": ID_BTN_SAVE_BOOKMARK,
+			"Weight": 0,
+			"FixedSize": toolbutton_size,
+			"Text": "★",
+			"ToolTip": "Save To Bookmarks",
+			"Events": {"Clicked": True},
+		})
+
+		self._tree_bookmarks = self._ui.Tree({
+			"ID": ID_TREE_BOOKMARKS,
+			#"Hidden": True,
 			"AlternatingRowColors":True,
 			"RootIsDecorated": False,
 			"HeaderHidden":True,
@@ -92,16 +97,19 @@ class MPNMainWindow(MPNAbstractWidget):
 					self._lbl_master,
 					self._cmb_media_pool_path,
 					self._btn_set_current,
+					self._btn_save_bookmark,
 				]
 			),
-			
-			self._ui.VGap(),
-			
-			self._ui.Label({
-				"Weight":0,
-				"FrameStyle": 4,
-			}),
 
+			self._tree_bookmarks,
+			
+#			self._ui.VGap(),
+			
+#			self._ui.Label({
+#				"Weight":0,
+#				"FrameStyle": 4,
+#			}),
+#
 			self._ui.HGroup({
 				"Weight": 0,
 			},[
@@ -120,15 +128,20 @@ class MPNMainWindow(MPNAbstractWidget):
 
 		return self._cmb_media_pool_path
 
-	def subfolder_list_view(self) -> object:
+	def bookmark_list_view(self) -> object:
 		"""The subfolder `Tree` view"""
 
-		return self._tree_subfolders
+		return self._tree_bookmarks
 
 	def button_use_current(self) -> object:
 		"""The "Use Current" `Button`"""
 
 		return self._btn_set_current
+
+	def button_add_bookmark(self) -> object:
+		"""The `Add To Bookmarks` Button"""
+
+		return self._btn_save_bookmark
 
 	def info_label(self) -> object:
 		"""The software info label"""

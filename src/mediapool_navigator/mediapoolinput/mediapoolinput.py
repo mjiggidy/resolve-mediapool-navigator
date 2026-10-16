@@ -6,7 +6,7 @@ if typing.TYPE_CHECKING:
 
 from .. import resolve
 from ..utils import folders, formatting
-from .callbacks import MPICallbacks
+from .callbacks import MPILineEditCallbacks
 
 _logger     = logging.getLogger(__name__)
 
@@ -20,10 +20,10 @@ class _MPIFolderInfo:
 		self._folder_handle:dvr.Folder|None = None
 		self._folder_path:str   = ""
 
-		self._callbacks:dict[MPICallbacks, list[typing.Callable]] = dict()
+		self._callbacks:dict[MPILineEditCallbacks, list[typing.Callable]] = dict()
 
 		# Register callback types
-		for callback in MPICallbacks:
+		for callback in MPILineEditCallbacks:
 			self._callbacks[callback] = []
 
 	def _set_folder(self, folder:dvr.Folder) -> bool:
@@ -37,7 +37,7 @@ class _MPIFolderInfo:
 		self._folder_path   = self._format_folder_path(folders.get_path_from_folder(folder))
 		self._folder_handle = folder
 
-		self._send_callback(MPICallbacks.CURRENT_FOLDER_CHANGED, folder)
+		self._send_callback(MPILineEditCallbacks.CURRENT_FOLDER_CHANGED, folder)
 
 		return True
 
@@ -61,7 +61,7 @@ class _MPIFolderInfo:
 		self._folder_handle = folders.get_folder_from_path(folder_path, root_folder)
 		self._folder_path   = self._format_folder_path(folder_path)
 
-		self._send_callback(MPICallbacks.CURRENT_FOLDER_CHANGED, self._folder_handle)
+		self._send_callback(MPILineEditCallbacks.CURRENT_FOLDER_CHANGED, self._folder_handle)
 
 		return True
 
@@ -74,7 +74,7 @@ class _MPIFolderInfo:
 		self._folder_handle = None
 		self._folder_path   = ""
 
-		self._send_callback(MPICallbacks.CURRENT_FOLDER_CHANGED, self._folder_handle)
+		self._send_callback(MPILineEditCallbacks.CURRENT_FOLDER_CHANGED, self._folder_handle)
 
 		return True
 
@@ -110,12 +110,12 @@ class _MPIFolderInfo:
 
 		return [str(self.folder_path() + "/" + f.GetName()).lstrip("/") for f in self.subfolder_handles()]
 
-	def register_callback(self, callback:MPICallbacks, callback_function:typing.Callable):
+	def register_callback(self, callback:MPILineEditCallbacks, callback_function:typing.Callable):
 		"""Register a callback function"""
 
 		self._callbacks[callback].append(callback_function)
 
-	def _send_callback(self, callback:MPICallbacks, args:typing.Any=None):
+	def _send_callback(self, callback:MPILineEditCallbacks, args:typing.Any=None):
 
 		for cb in self._callbacks[callback]:
 			cb(args)
