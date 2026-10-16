@@ -25,7 +25,7 @@ class MPNMainController:
 		self._bookmarks_controller        = MPIBookmarkManager(self._main_widget.bookmark_list_view())
 
 		self._media_pool_input_controller.current_folder_info().register_callback(MPILineEditCallbacks.CURRENT_FOLDER_CHANGED, self._update_combo_choices)
-		self._bookmarks_controller.register_callback(MPIBookmarkCallbacks.FOLDER_HIGHLIGHTED, self._media_pool_input_controller.set_path_from_text)
+		self._bookmarks_controller.register_callback(MPIBookmarkCallbacks.FOLDER_HIGHLIGHTED, self._on_bookmark_highlighted)
 		self._bookmarks_controller.register_callback(MPIBookmarkCallbacks.FOLDER_CHOSEN, self._on_go_button_clicked)
 
 		self._combo_options:list[str] = []
@@ -39,13 +39,8 @@ class MPNMainController:
 				self._media_pool_input_controller.set_path_from_folder(start_folder)
 			except Exception as e:
 				print(e)
+
 			self.set_ready(True)
-
-		# BOOKMARK TEMP
-
-		for path in ["80 TURNOVERS/To MX", "80 TURNOVERS/To MX/To BZ", "80 TURNOVERS/To MX/To SF", "50 ARTIFICIAL BEANS/BY SCENE", "50 ARTIFICIAL BEANS/QUICKENING CONCEPTS", "10 SOUND/1 - Sound Effects"]:
-
-			self._bookmarks_controller.add_folder_path(path)
 
 	def _update_combo_choices(self, folder):
 
@@ -67,8 +62,27 @@ class MPNMainController:
 		window_handle.On[self._main_widget.button_use_current().ID].Clicked           = self._on_set_current_button_clicked
 		window_handle.On[self._main_widget.media_pool_path_editor().ID].ReturnPressed = self._on_go_button_clicked
 
+		window_handle.On[self._main_widget.button_add_bookmark().ID].Clicked          = self._on_add_bookmark
+
 		self._media_pool_input_controller.register_window_handle(window_handle)
 		self._bookmarks_controller.register_window_handle(window_handle)
+
+	def _on_add_bookmark(self, event:dict):
+
+		self._bookmarks_controller.add_folder_path(self._main_widget.media_pool_path_editor().Text)
+
+	def _on_bookmark_highlighted(self, folder_path:str):
+
+		self.set_ready(False)
+
+		base_path, subfolder = folder_path.rsplit("/", 1)
+
+		self._media_pool_input_controller._folder_tracker._set_folder_path(base_path)
+		self._media_pool_input_controller.set_path_from_text(base_path + "/", subfolder)
+
+		self.set_ready(True)
+
+		self._main_widget.media_pool_path_combo().SetFocus()
 
 	def _on_subfolders_changed(self, subfolders:list[object]):
 
@@ -91,6 +105,8 @@ class MPNMainController:
 
 	def _on_go_button_clicked(self, event:dict):
 
+		self.set_ready(False)
+
 		mp = resolve.GetProjectManager().GetCurrentProject().GetMediaPool()
 
 		folder_path = self._main_widget._txt_media_pool_path.Text
@@ -108,9 +124,16 @@ class MPNMainController:
 
 			print(e)
 
+		self.set_ready(True)
+
+		self._bookmarks_controller.select_folder_path(folder_path)
+		self._main_widget.media_pool_path_combo().SetFocus()
+
+
 	def set_ready(self, is_ready:bool=True):
 
 		self._main_widget.button_use_current().Enabled    = is_ready
+		self._main_widget.button_add_bookmark().Enabled   = is_ready
 		self._main_widget.media_pool_path_combo().Enabled = is_ready
 		self._main_widget.bookmark_list_view().Enabled    = is_ready
 
@@ -125,3 +148,7 @@ class MPNMainController:
 			parts.append(f"<a href=\"{donate_url}\">Donate</a>")
 
 		self._main_widget.info_label().Text = " | ".join(parts)
+
+	def bookmarks_controller(self) -> MPIBookmarkManager:
+
+		return self._bookmarks_controller
