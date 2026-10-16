@@ -16,7 +16,7 @@ def main():
 
 		with open(PATH_SETTINGS, "w") as handle_settings:
 
-			json.dump(settings, handle_settings)
+			json.dump(settings, handle_settings, indent="\t")
 
 		dispatcher.ExitLoop(0)
 	
