@@ -150,7 +150,8 @@ class MPILineEditController:
 
 		folder_path = self._folder_tracker.folder_path()
 
-		self.set_path_from_text("", folder_path)
+		self.set_path_from_text(folder_path)
+		self._line_edit.SelectAll()
 
 	def set_path_from_text(self, base_text:str, autocomplete_text:str=""):
 		"""Set the current path from text"""
