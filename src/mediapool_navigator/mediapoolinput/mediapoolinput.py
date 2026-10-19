@@ -173,6 +173,23 @@ class MPILineEditController:
 
 		current_edit_length = len(event["Text"])
 
+		# If the user is editing text (either backspacin' or editing in the middle), don't autocomplete
+
+		if any([
+			current_edit_length <= self._last_edit_length,
+			self._line_edit.CursorPosition < current_edit_length,
+		]):
+			
+			if current_edit_length <= self._last_edit_length:
+				_logger.debug("Because edit length: current_length=%s, last_length=%s", current_edit_length, self._last_edit_length)
+			
+			if self._line_edit.CursorPosition < current_edit_length:
+				_logger.debug("Because cursor position")
+
+			self._last_edit_length = current_edit_length
+			
+			return
+
 		# Add a trailing slash to allow for "root" folders to be split between "" (Master) and the partial folder name
 		# NOTE: Yes, that comment made sense to me when I wrote it
 		
@@ -199,24 +216,6 @@ class MPILineEditController:
 			filter(lambda f: f.GetName().startswith(partial_folder_name), self._folder_tracker.subfolder_handles())
 		)
 
-		# If the user is editing text (either backspacin' or editing in the middle), don't autocomplete
-		if any([
-#			not filtered_subfolders,
-			current_edit_length <= self._last_edit_length,
-			self._line_edit.CursorPosition < current_edit_length,
-		]):
-			
-#			if not filtered_subfolders:
-#				logger.debug("Because no subfolders")
-			
-			if current_edit_length <= self._last_edit_length:
-				_logger.debug("Because edit length: current_length=%s, last_length=%s", current_edit_length, self._last_edit_length)
-			
-			if self._line_edit.CursorPosition < current_edit_length:
-				_logger.debug("Because cursor position")
-
-			self._last_edit_length = current_edit_length
-			return
 
 
 		next_subfolder_name = filtered_subfolders[0].GetName() if filtered_subfolders else ""
