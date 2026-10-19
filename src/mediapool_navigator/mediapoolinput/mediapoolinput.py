@@ -156,8 +156,39 @@ class MPILineEditController:
 	def set_path_from_text(self, base_text:str, autocomplete_text:str=""):
 		"""Set the current path from text"""
 
-		self._line_edit.Text   = base_text + autocomplete_text
-		self._line_edit.SetSelection(len(self._line_edit.Text), -len(autocomplete_text))
+		sanitized_text:str = "/" + base_text if not base_text.startswith("/") else base_text
+
+		# Split input string into base path and "partial" (or... full, really) folder name
+		# NOTE: For a trailing slash, partial_folder_name becomes "" which is perfect
+
+		base_path, partial_folder_name = sanitized_text.rsplit("/", 1)
+		
+		# Try to resolve the base Folder handle from the given path, and query any subfolders therein
+		# If any of this fails, something's invalid about the path, so just set subfolders to an empty
+		# list so we don't autocomplete anything atoll, and any subfolder listings are cleared out
+
+		try:
+			self._folder_tracker._set_folder_path(base_path)
+	
+		except FileNotFoundError as e:
+			
+			_logger.error("Invalid media pool folder: %s", e)
+			self._folder_tracker._clear_folder()
+
+		filtered_subfolders = list(
+			filter(lambda f: f.GetName().startswith(partial_folder_name), self._folder_tracker.subfolder_handles())
+		)
+
+
+
+		next_subfolder_name = filtered_subfolders[0].GetName() if filtered_subfolders else ""
+		next_subfolder_autocomplete = next_subfolder_name[len(partial_folder_name):]
+
+		
+
+		self._line_edit.Text   = base_text + next_subfolder_autocomplete
+
+		self._line_edit.SetSelection(len(self._line_edit.Text), -len(next_subfolder_autocomplete))
 
 		self._last_edit_length = len(base_text)
 
@@ -193,31 +224,6 @@ class MPILineEditController:
 		# Add a trailing slash to allow for "root" folders to be split between "" (Master) and the partial folder name
 		# NOTE: Yes, that comment made sense to me when I wrote it
 		
-		sanitized_text:str = "/" + event["Text"] if not event["Text"].startswith("/") else event["Text"]
-
-		# Split input string into base path and "partial" (or... full, really) folder name
-		# NOTE: For a trailing slash, partial_folder_name becomes "" which is perfect
-
-		base_path, partial_folder_name = sanitized_text.rsplit("/", 1)
-		
-		# Try to resolve the base Folder handle from the given path, and query any subfolders therein
-		# If any of this fails, something's invalid about the path, so just set subfolders to an empty
-		# list so we don't autocomplete anything atoll, and any subfolder listings are cleared out
-
-		try:
-			self._folder_tracker._set_folder_path(base_path)
-	
-		except FileNotFoundError as e:
-			
-			_logger.error("Invalid media pool folder: %s", e)
-			self._folder_tracker._clear_folder()
-
-		filtered_subfolders = list(
-			filter(lambda f: f.GetName().startswith(partial_folder_name), self._folder_tracker.subfolder_handles())
-		)
 
 
-
-		next_subfolder_name = filtered_subfolders[0].GetName() if filtered_subfolders else ""
-
-		self.set_path_from_text(event["Text"], next_subfolder_name[len(partial_folder_name):])
+		self.set_path_from_text(event["Text"])
