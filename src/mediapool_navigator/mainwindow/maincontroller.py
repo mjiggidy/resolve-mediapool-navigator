@@ -80,13 +80,6 @@ class MPNMainController:
 
 		self._main_widget.media_pool_path_combo().SetFocus()
 
-	def _on_subfolders_changed(self, subfolders:list[object]):
-
-		print("---")
-		for sub in subfolders:
-
-			print(sub.GetName())
-
 	def _on_set_current_button_clicked(self, event:dict):
 
 		self.set_ready(False)
