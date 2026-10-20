@@ -74,11 +74,7 @@ class MPNMainController:
 	def _on_bookmark_highlighted(self, folder_path:str):
 
 		self.set_ready(False)
-
-		base_path, subfolder = folder_path.rsplit("/", 1)
-
-		self._media_pool_input_controller._folder_tracker._set_folder_path(base_path)
-		self._media_pool_input_controller.set_path_from_text(base_path + "/", subfolder)
+		self._media_pool_input_controller.set_path_from_text(folder_path)
 
 		self.set_ready(True)
 
