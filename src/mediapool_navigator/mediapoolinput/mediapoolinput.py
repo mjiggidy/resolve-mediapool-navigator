@@ -153,8 +153,10 @@ class MPILineEditController:
 		self.set_path_from_text(folder_path)
 		self._line_edit.SelectAll()
 
-	def set_path_from_text(self, path_text:str, autocomplete_path:bool=True):
+	def set_path_from_text(self, path_text:str, show_autocomplete:bool=True):
 		"""Set the current path from text, and autocomplete with suggestion"""
+
+		cursor_position = self._line_edit.CursorPosition
 
 		# Prepend a slash to the root folder so that "first-level" folders become the partial folder name when split
 		sanitized_text:str = "/" + path_text if not path_text.startswith("/") else path_text
@@ -168,15 +170,27 @@ class MPILineEditController:
 			_logger.error("Invalid media pool folder: %s", e)
 			self._folder_tracker._clear_folder()
 
-		filtered_subfolders = list(
-			filter(lambda f: f.GetName().startswith(partial_folder_name), self._folder_tracker.subfolder_handles())
-		)
+		# Determine autocomplete for a valid folder path
+		if self._folder_tracker.folder_is_valid() and show_autocomplete:
+		
+			filtered_subfolders = list(
+				filter(lambda f: f.GetName().startswith(partial_folder_name), self._folder_tracker.subfolder_handles())
+			)
 
-		next_subfolder_name = filtered_subfolders[0].GetName() if filtered_subfolders else ""
-		next_subfolder_autocomplete = next_subfolder_name[len(partial_folder_name):]
+			next_subfolder_name = filtered_subfolders[0].GetName() if filtered_subfolders else ""
+			next_subfolder_autocomplete = next_subfolder_name[len(partial_folder_name):]
 
-		self._line_edit.Text = path_text + next_subfolder_autocomplete
-		self._line_edit.SetSelection(len(self._line_edit.Text), -len(next_subfolder_autocomplete))
+			self._line_edit.Text = path_text + next_subfolder_autocomplete
+			self._line_edit.SetSelection(len(self._line_edit.Text), -len(next_subfolder_autocomplete))
+
+		# Set text verbatim if the path is invalid, something other than the current input, or autocomplete is unwanted
+		elif self._line_edit.Text != path_text:
+
+			self._line_edit.Text = path_text
+
+		# Otherwise restore cursor position (can sometimes lose its offset when a combobox clears its items I guess)
+		else:
+			self._line_edit.SetCursorPosition(cursor_position)
 
 		self._last_edit_length = len(path_text)
 
@@ -194,19 +208,9 @@ class MPILineEditController:
 
 		# If the user is editing text (either backspacin' or editing in the middle), don't autocomplete
 
-		if any([
+		show_autocomplete = not any([
 			current_edit_length <= self._last_edit_length,
 			self._line_edit.CursorPosition < current_edit_length,
-		]):
-			
-			if current_edit_length <= self._last_edit_length:
-				_logger.debug("Because edit length: current_length=%s, last_length=%s", current_edit_length, self._last_edit_length)
-			
-			if self._line_edit.CursorPosition < current_edit_length:
-				_logger.debug("Because cursor position")
+		])
 
-			self._last_edit_length = current_edit_length
-			
-			return
-
-		self.set_path_from_text(event["Text"])
+		self.set_path_from_text(event["Text"], show_autocomplete)
