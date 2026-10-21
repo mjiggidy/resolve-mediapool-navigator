@@ -1,5 +1,5 @@
 import typing
-from .callbacks import MPIBookmarkCallbacks
+from ._callbacks import MPIBookmarkCallbacks
 
 class MPIBookmarkManager:
 

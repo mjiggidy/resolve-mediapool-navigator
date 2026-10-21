@@ -1,36 +1,40 @@
 from __future__ import annotations
 
+import typing
+
 from . import mainwidget
 
 from .. import __VERSION__, URL_GITHUB, URL_DONATE
-from ..bookmarks.bookmarkscontroller import MPIBookmarkManager
-from ..bookmarks.callbacks import MPIBookmarkCallbacks
-from ..mediapoolinput.mediapoolinput import MPILineEditController
-from ..mediapoolinput.callbacks import MPILineEditCallbacks
+from ..bookmarks import MPIBookmarkManager
+from ..bookmarks import MPIBookmarkCallbacks
+from mediapoolinput import MPILineEditCallbacks, MPILineEditController
 
-from .. import resolve
+from resolvecommon import folders
 
-from ..utils import folders
+if typing.TYPE_CHECKING:
+	import DaVinciResolveScript as dvrtypes
 
 class MPNMainController:
 	"""Main application controller"""
 
-	def __init__(self, main_widget:mainwidget.MPNMainWindow):
+	def __init__(self, project_manager:dvrtypes.ProjectManager, main_widget:mainwidget.MPNMainWindow):
 
+		self._resolve_project_manager = project_manager
 		self._main_widget = main_widget
 
 		self.set_info_label(version_string=__VERSION__, github_url=URL_GITHUB, donate_url=URL_DONATE)
 
-		self._media_pool_input_controller = MPILineEditController(self._main_widget.media_pool_path_editor())
+		self._media_pool_input_controller = MPILineEditController(self._resolve_project_manager, self._main_widget.media_pool_path_editor())
 		self._bookmarks_controller        = MPIBookmarkManager(self._main_widget.bookmark_list_view())
 
 		self._media_pool_input_controller.current_folder_info().register_callback(MPILineEditCallbacks.CURRENT_FOLDER_CHANGED, self._update_combo_choices)
+		self._media_pool_input_controller.current_folder_info().register_callback(MPILineEditCallbacks.PATH_VALIDITY_CHANGED, self._on_path_validity_changed)
 		self._bookmarks_controller.register_callback(MPIBookmarkCallbacks.FOLDER_HIGHLIGHTED, self._on_bookmark_highlighted)
 		self._bookmarks_controller.register_callback(MPIBookmarkCallbacks.FOLDER_CHOSEN, self._on_go_button_clicked)
 
 		self._combo_options:list[str] = []
 
-		start_folder = resolve.GetProjectManager().GetCurrentProject().GetMediaPool().GetCurrentFolder()
+		start_folder = self._resolve_project_manager.GetCurrentProject().GetMediaPool().GetCurrentFolder()
 
 		if start_folder:
 
@@ -67,6 +71,10 @@ class MPNMainController:
 		self._media_pool_input_controller.register_window_handle(window_handle)
 		self._bookmarks_controller.register_window_handle(window_handle)
 
+	def _on_path_validity_changed(self, is_valid:bool):
+
+		self._main_widget.button_add_bookmark().Enabled = is_valid
+
 	def _on_add_bookmark(self, event:dict):
 
 		self._bookmarks_controller.add_folder_path(self._main_widget.media_pool_path_editor().Text)
@@ -74,28 +82,17 @@ class MPNMainController:
 	def _on_bookmark_highlighted(self, folder_path:str):
 
 		self.set_ready(False)
-
-		base_path, subfolder = folder_path.rsplit("/", 1)
-
-		self._media_pool_input_controller._folder_tracker._set_folder_path(base_path)
-		self._media_pool_input_controller.set_path_from_text(base_path + "/", subfolder)
+		self._media_pool_input_controller.set_path_from_text(folder_path)
 
 		self.set_ready(True)
 
 		self._main_widget.media_pool_path_combo().SetFocus()
 
-	def _on_subfolders_changed(self, subfolders:list[object]):
-
-		print("---")
-		for sub in subfolders:
-
-			print(sub.GetName())
-
 	def _on_set_current_button_clicked(self, event:dict):
 
 		self.set_ready(False)
 
-		current_folder = resolve.GetProjectManager().GetCurrentProject().GetMediaPool().GetCurrentFolder()
+		current_folder = self._resolve_project_manager.GetCurrentProject().GetMediaPool().GetCurrentFolder()
 
 		if current_folder:
 			self._media_pool_input_controller.set_path_from_folder(current_folder)
@@ -107,7 +104,7 @@ class MPNMainController:
 
 		self.set_ready(False)
 
-		mp = resolve.GetProjectManager().GetCurrentProject().GetMediaPool()
+		mp = self._resolve_project_manager.GetCurrentProject().GetMediaPool()
 
 		folder_path = self._main_widget._txt_media_pool_path.Text
 
