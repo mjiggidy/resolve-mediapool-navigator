@@ -19,6 +19,8 @@ class _MPIFolderInfo:
 
 		self._folder_handle:dvr.Folder|None = None
 		self._folder_path:str   = ""
+		
+		self._subfolder_is_valid = False
 
 		self._callbacks:dict[MPILineEditCallbacks, list[typing.Callable]] = dict()
 
@@ -65,6 +67,18 @@ class _MPIFolderInfo:
 
 		return True
 
+	def _validate_subfolder_name(self, subfolder_name:str) -> bool:
+		"""Check the full path, including subfolder, for validity"""
+
+		path_was_valid = self._subfolder_is_valid
+
+		self._subfolder_is_valid = subfolder_name in self.subfolder_names()
+
+		if path_was_valid is not self._subfolder_is_valid:
+			self._send_callback(MPILineEditCallbacks.PATH_VALIDITY_CHANGED, self._subfolder_is_valid)
+
+		return self._subfolder_is_valid
+
 	def _clear_folder(self) -> bool:
 		"""Clear the current folder.  Returns `True` if this is a change."""
 
@@ -100,6 +114,11 @@ class _MPIFolderInfo:
 			self._folder_handle.GetSubFolderList(),
 			key = lambda f: formatting.format_string_for_natural_sort(f.GetName())
 		) if self.folder_is_valid() else []
+
+	def subfolder_names(self) -> list[str]:
+		"""A list of all subfolder names, sorted naturally"""
+
+		return [f.GetName() for f in self.subfolder_handles()]
 
 	def subfolder_paths(self) -> list[str]:
 		"""List of available subfolder paths"""
@@ -150,15 +169,55 @@ class MPILineEditController:
 
 		folder_path = self._folder_tracker.folder_path()
 
-		self.set_path_from_text("", folder_path)
+		self.set_path_from_text(folder_path)
+		self._line_edit.SelectAll()
 
-	def set_path_from_text(self, base_text:str, autocomplete_text:str=""):
-		"""Set the current path from text"""
+	def set_path_from_text(self, path_text:str, show_autocomplete:bool=True):
+		"""Set the current path from text, and autocomplete with suggestion"""
 
-		self._line_edit.Text   = base_text + autocomplete_text
-		self._line_edit.SetSelection(len(self._line_edit.Text), -len(autocomplete_text))
+		cursor_position = self._line_edit.CursorPosition
 
-		self._last_edit_length = len(base_text)
+		# Prepend a slash to the root folder so that "first-level" folders become the partial folder name when split
+		sanitized_text:str = "/" + path_text if not path_text.startswith("/") else path_text
+		base_path, partial_folder_name = sanitized_text.rsplit("/", 1)
+
+		try:
+			self._folder_tracker._set_folder_path(base_path)
+	
+		except FileNotFoundError as e:
+			
+			_logger.error("Invalid media pool folder: %s", e)
+			self._folder_tracker._clear_folder()
+
+		# Determine autocomplete for a valid folder path
+		if self._folder_tracker.folder_is_valid() and show_autocomplete:
+		
+			next_subfolder_name = next(
+				filter(lambda f: f.startswith(partial_folder_name), self._folder_tracker.subfolder_names()),
+				""
+			)
+			next_subfolder_autocomplete = next_subfolder_name[len(partial_folder_name):]
+			
+			self._folder_tracker._validate_subfolder_name(next_subfolder_name)
+
+			self._line_edit.Text = path_text + next_subfolder_autocomplete
+			self._line_edit.SetSelection(len(self._line_edit.Text), -len(next_subfolder_autocomplete))
+
+		# Set text verbatim if the path is invalid, something other than the current input, or autocomplete is unwanted
+		elif self._line_edit.Text != path_text:
+
+			self._folder_tracker._validate_subfolder_name(partial_folder_name)
+
+			self._line_edit.Text = path_text
+
+		# Otherwise restore cursor position (can sometimes lose its offset when a combobox clears its items I guess)
+		else:
+
+			self._folder_tracker._validate_subfolder_name(partial_folder_name)
+			self._line_edit.SetCursorPosition(cursor_position)
+
+		self._last_edit_length = len(path_text)
+
 
 		_logger.debug("Edit length set to %s", self._last_edit_length)
 	
@@ -172,52 +231,11 @@ class MPILineEditController:
 
 		current_edit_length = len(event["Text"])
 
-		# Add a trailing slash to allow for "root" folders to be split between "" (Master) and the partial folder name
-		# NOTE: Yes, that comment made sense to me when I wrote it
-		
-		sanitized_text:str = "/" + event["Text"] if not event["Text"].startswith("/") else event["Text"]
-
-		# Split input string into base path and "partial" (or... full, really) folder name
-		# NOTE: For a trailing slash, partial_folder_name becomes "" which is perfect
-
-		base_path, partial_folder_name = sanitized_text.rsplit("/", 1)
-		
-		# Try to resolve the base Folder handle from the given path, and query any subfolders therein
-		# If any of this fails, something's invalid about the path, so just set subfolders to an empty
-		# list so we don't autocomplete anything atoll, and any subfolder listings are cleared out
-
-		try:
-			self._folder_tracker._set_folder_path(base_path)
-	
-		except FileNotFoundError as e:
-			
-			_logger.error("Invalid media pool folder: %s", e)
-			self._folder_tracker._clear_folder()
-
-		filtered_subfolders = list(
-			filter(lambda f: f.GetName().startswith(partial_folder_name), self._folder_tracker.subfolder_handles())
-		)
-
 		# If the user is editing text (either backspacin' or editing in the middle), don't autocomplete
-		if any([
-#			not filtered_subfolders,
+
+		show_autocomplete = not any([
 			current_edit_length <= self._last_edit_length,
 			self._line_edit.CursorPosition < current_edit_length,
-		]):
-			
-#			if not filtered_subfolders:
-#				logger.debug("Because no subfolders")
-			
-			if current_edit_length <= self._last_edit_length:
-				_logger.debug("Because edit length: current_length=%s, last_length=%s", current_edit_length, self._last_edit_length)
-			
-			if self._line_edit.CursorPosition < current_edit_length:
-				_logger.debug("Because cursor position")
+		])
 
-			self._last_edit_length = current_edit_length
-			return
-
-
-		next_subfolder_name = filtered_subfolders[0].GetName() if filtered_subfolders else ""
-
-		self.set_path_from_text(event["Text"], next_subfolder_name[len(partial_folder_name):])
+		self.set_path_from_text(event["Text"], show_autocomplete)

@@ -1,10 +1,13 @@
-from .mainwindow import maincontroller, mainwidget
+import json, sys
+
 from . import ui, dispatcher
 
+from .mainwindow import maincontroller, mainwidget
+from .utils import user_paths
 
-import json, sys
-PATH_SETTINGS = "mpn_settings.json"
-
+PATH_USER_BASE = user_paths.get_user_base_path()
+PATH_CFG_USER  = PATH_USER_BASE / "config" / "user_config.json"
+PATH_LOG_USER  = PATH_USER_BASE / "logs" / "user_logs.log"
 
 def main():
 
@@ -15,7 +18,11 @@ def main():
 		}
 
 		try:
-			with open(PATH_SETTINGS, "w") as handle_settings:
+
+			import pathlib
+			pathlib.Path(PATH_CFG_USER).parent.mkdir(parents=True, exist_ok=True)
+			
+			with open(PATH_CFG_USER, "w") as handle_settings:
 				json.dump(settings, handle_settings, indent="\t")
 		
 		except Exception as e:
@@ -42,7 +49,7 @@ def main():
 	
 	try:
 		
-		with open(PATH_SETTINGS) as handle_settings:
+		with open(PATH_CFG_USER) as handle_settings:
 			settings.update(json.load(handle_settings))
 	
 	except Exception as e:

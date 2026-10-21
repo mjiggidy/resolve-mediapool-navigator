@@ -25,6 +25,7 @@ class MPNMainController:
 		self._bookmarks_controller        = MPIBookmarkManager(self._main_widget.bookmark_list_view())
 
 		self._media_pool_input_controller.current_folder_info().register_callback(MPILineEditCallbacks.CURRENT_FOLDER_CHANGED, self._update_combo_choices)
+		self._media_pool_input_controller.current_folder_info().register_callback(MPILineEditCallbacks.PATH_VALIDITY_CHANGED, self._on_path_validity_changed)
 		self._bookmarks_controller.register_callback(MPIBookmarkCallbacks.FOLDER_HIGHLIGHTED, self._on_bookmark_highlighted)
 		self._bookmarks_controller.register_callback(MPIBookmarkCallbacks.FOLDER_CHOSEN, self._on_go_button_clicked)
 
@@ -67,6 +68,10 @@ class MPNMainController:
 		self._media_pool_input_controller.register_window_handle(window_handle)
 		self._bookmarks_controller.register_window_handle(window_handle)
 
+	def _on_path_validity_changed(self, is_valid:bool):
+
+		self._main_widget.button_add_bookmark().Enabled = is_valid
+
 	def _on_add_bookmark(self, event:dict):
 
 		self._bookmarks_controller.add_folder_path(self._main_widget.media_pool_path_editor().Text)
@@ -74,22 +79,11 @@ class MPNMainController:
 	def _on_bookmark_highlighted(self, folder_path:str):
 
 		self.set_ready(False)
-
-		base_path, subfolder = folder_path.rsplit("/", 1)
-
-		self._media_pool_input_controller._folder_tracker._set_folder_path(base_path)
-		self._media_pool_input_controller.set_path_from_text(base_path + "/", subfolder)
+		self._media_pool_input_controller.set_path_from_text(folder_path)
 
 		self.set_ready(True)
 
 		self._main_widget.media_pool_path_combo().SetFocus()
-
-	def _on_subfolders_changed(self, subfolders:list[object]):
-
-		print("---")
-		for sub in subfolders:
-
-			print(sub.GetName())
 
 	def _on_set_current_button_clicked(self, event:dict):
 
