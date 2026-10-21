@@ -18,6 +18,10 @@ def main():
 		}
 
 		try:
+
+			import pathlib
+			pathlib.Path(PATH_CFG_USER).parent.mkdir(parents=True, exist_ok=True)
+			
 			with open(PATH_CFG_USER, "w") as handle_settings:
 				json.dump(settings, handle_settings, indent="\t")
 		
