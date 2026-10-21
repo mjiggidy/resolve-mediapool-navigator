@@ -19,6 +19,8 @@ class _MPIFolderInfo:
 
 		self._folder_handle:dvr.Folder|None = None
 		self._folder_path:str   = ""
+		
+		self._subfolder_is_valid = False
 
 		self._callbacks:dict[MPILineEditCallbacks, list[typing.Callable]] = dict()
 
@@ -65,6 +67,18 @@ class _MPIFolderInfo:
 
 		return True
 
+	def _validate_subfolder_name(self, subfolder_name:str) -> bool:
+		"""Check the full path, including subfolder, for validity"""
+
+		path_was_valid = self._subfolder_is_valid
+
+		self._subfolder_is_valid = subfolder_name in self.subfolder_names()
+
+		if path_was_valid is not self._subfolder_is_valid:
+			self._send_callback(MPILineEditCallbacks.PATH_VALIDITY_CHANGED, self._subfolder_is_valid)
+
+		return self._subfolder_is_valid
+
 	def _clear_folder(self) -> bool:
 		"""Clear the current folder.  Returns `True` if this is a change."""
 
@@ -100,6 +114,11 @@ class _MPIFolderInfo:
 			self._folder_handle.GetSubFolderList(),
 			key = lambda f: formatting.format_string_for_natural_sort(f.GetName())
 		) if self.folder_is_valid() else []
+
+	def subfolder_names(self) -> list[str]:
+		"""A list of all subfolder names, sorted naturally"""
+
+		return [f.GetName() for f in self.subfolder_handles()]
 
 	def subfolder_paths(self) -> list[str]:
 		"""List of available subfolder paths"""
@@ -173,12 +192,13 @@ class MPILineEditController:
 		# Determine autocomplete for a valid folder path
 		if self._folder_tracker.folder_is_valid() and show_autocomplete:
 		
-			filtered_subfolders = list(
-				filter(lambda f: f.GetName().startswith(partial_folder_name), self._folder_tracker.subfolder_handles())
+			next_subfolder_name = next(
+				filter(lambda f: f.startswith(partial_folder_name), self._folder_tracker.subfolder_names()),
+				""
 			)
-
-			next_subfolder_name = filtered_subfolders[0].GetName() if filtered_subfolders else ""
 			next_subfolder_autocomplete = next_subfolder_name[len(partial_folder_name):]
+			
+			self._folder_tracker._validate_subfolder_name(next_subfolder_name)
 
 			self._line_edit.Text = path_text + next_subfolder_autocomplete
 			self._line_edit.SetSelection(len(self._line_edit.Text), -len(next_subfolder_autocomplete))
@@ -186,13 +206,18 @@ class MPILineEditController:
 		# Set text verbatim if the path is invalid, something other than the current input, or autocomplete is unwanted
 		elif self._line_edit.Text != path_text:
 
+			self._folder_tracker._validate_subfolder_name(partial_folder_name)
+
 			self._line_edit.Text = path_text
 
 		# Otherwise restore cursor position (can sometimes lose its offset when a combobox clears its items I guess)
 		else:
+
+			self._folder_tracker._validate_subfolder_name(partial_folder_name)
 			self._line_edit.SetCursorPosition(cursor_position)
 
 		self._last_edit_length = len(path_text)
+
 
 		_logger.debug("Edit length set to %s", self._last_edit_length)
 	
