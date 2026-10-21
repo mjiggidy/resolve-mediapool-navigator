@@ -1,6 +1,6 @@
 # Resolve Media Pool Navigator EXTREME!!*
 
-Navigate the Media Pool by typing a path to a folder, like a real nerd!  Featuring autocomplete (working) and bookmarks (comin' up).
+Navigate the Media Pool by typing a path to a folder, like a real nerd!  Featuring autocompleted paths and bookmarks.
 
 ![Embarrassing Screenshot](screenshot.png)
 
