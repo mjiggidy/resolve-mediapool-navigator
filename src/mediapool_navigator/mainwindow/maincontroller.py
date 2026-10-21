@@ -1,27 +1,30 @@
 from __future__ import annotations
 
+import typing
+
 from . import mainwidget
 
 from .. import __VERSION__, URL_GITHUB, URL_DONATE
-from ..bookmarks.bookmarkscontroller import MPIBookmarkManager
-from ..bookmarks.callbacks import MPIBookmarkCallbacks
-from ..mediapoolinput.mediapoolinput import MPILineEditController
-from ..mediapoolinput.callbacks import MPILineEditCallbacks
+from ..bookmarks import MPIBookmarkManager
+from ..bookmarks import MPIBookmarkCallbacks
+from mediapoolinput import MPILineEditCallbacks, MPILineEditController
 
-from .. import resolve
+from resolvecommon import folders
 
-from ..utils import folders
+if typing.TYPE_CHECKING:
+	import DaVinciResolveScript as dvrtypes
 
 class MPNMainController:
 	"""Main application controller"""
 
-	def __init__(self, main_widget:mainwidget.MPNMainWindow):
+	def __init__(self, project_manager:dvrtypes.ProjectManager, main_widget:mainwidget.MPNMainWindow):
 
+		self._resolve_project_manager = project_manager
 		self._main_widget = main_widget
 
 		self.set_info_label(version_string=__VERSION__, github_url=URL_GITHUB, donate_url=URL_DONATE)
 
-		self._media_pool_input_controller = MPILineEditController(self._main_widget.media_pool_path_editor())
+		self._media_pool_input_controller = MPILineEditController(self._resolve_project_manager, self._main_widget.media_pool_path_editor())
 		self._bookmarks_controller        = MPIBookmarkManager(self._main_widget.bookmark_list_view())
 
 		self._media_pool_input_controller.current_folder_info().register_callback(MPILineEditCallbacks.CURRENT_FOLDER_CHANGED, self._update_combo_choices)
@@ -31,7 +34,7 @@ class MPNMainController:
 
 		self._combo_options:list[str] = []
 
-		start_folder = resolve.GetProjectManager().GetCurrentProject().GetMediaPool().GetCurrentFolder()
+		start_folder = self._resolve_project_manager.GetCurrentProject().GetMediaPool().GetCurrentFolder()
 
 		if start_folder:
 
@@ -89,7 +92,7 @@ class MPNMainController:
 
 		self.set_ready(False)
 
-		current_folder = resolve.GetProjectManager().GetCurrentProject().GetMediaPool().GetCurrentFolder()
+		current_folder = self._resolve_project_manager.GetCurrentProject().GetMediaPool().GetCurrentFolder()
 
 		if current_folder:
 			self._media_pool_input_controller.set_path_from_folder(current_folder)
@@ -101,7 +104,7 @@ class MPNMainController:
 
 		self.set_ready(False)
 
-		mp = resolve.GetProjectManager().GetCurrentProject().GetMediaPool()
+		mp = self._resolve_project_manager.GetCurrentProject().GetMediaPool()
 
 		folder_path = self._main_widget._txt_media_pool_path.Text
 

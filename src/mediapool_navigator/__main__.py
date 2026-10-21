@@ -1,15 +1,17 @@
-import json, sys
-
-from . import ui, dispatcher
-
+import json, sys, typing
 from .mainwindow import maincontroller, mainwidget
-from .utils import user_paths
+from resolvecommon import userpaths
 
-PATH_USER_BASE = user_paths.get_user_base_path()
+if typing.TYPE_CHECKING:
+	import DaVinciResolveScript as dvrtypes
+
+PATH_USER_BASE = userpaths.get_user_data_base_path() / "GlowingPixel" / "Resolve Media Pool Navigator"
 PATH_CFG_USER  = PATH_USER_BASE / "config" / "user_config.json"
 PATH_LOG_USER  = PATH_USER_BASE / "logs" / "user_logs.log"
 
-def main():
+def main(bmd:typing.Any, resolve:dvrtypes.Resolve, fusion:dvrtypes.Fusion):
+
+	dispatcher = bmd.UIDispatcher(fusion.UIManager)
 
 	def _on_main_closed(event:dict):
 
@@ -30,8 +32,8 @@ def main():
 
 		dispatcher.ExitLoop(0)
 	
-	main_widget = mainwidget.MPNMainWindow(ui)
-	app = maincontroller.MPNMainController(main_widget)
+	main_widget = mainwidget.MPNMainWindow(ui_manager=fusion.UIManager)
+	app = maincontroller.MPNMainController(project_manager=resolve.GetProjectManager(), main_widget=main_widget)
 
 	wnd_main = dispatcher.AddWindow({
 			"ID": mainwidget.ID_WINDOW_MAIN,
