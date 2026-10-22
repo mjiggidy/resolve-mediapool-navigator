@@ -81,12 +81,12 @@ class MPNMainController:
 
 	def _on_bookmark_highlighted(self, folder_path:str):
 
-		self.set_ready(False)
+#		self.set_ready(False)
 		self._media_pool_input_controller.set_path_from_text(folder_path)
 
-		self.set_ready(True)
+#		self.set_ready(True)
 
-		self._main_widget.media_pool_path_combo().SetFocus()
+#		self._main_widget.media_pool_path_combo().SetFocus()
 
 	def _on_set_current_button_clicked(self, event:dict):
 
