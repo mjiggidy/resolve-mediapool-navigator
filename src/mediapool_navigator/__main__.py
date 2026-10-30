@@ -38,8 +38,8 @@ def main(bmd:typing.Any, resolve:dvrtypes.Resolve, fusion:dvrtypes.Fusion):
 	wnd_main = dispatcher.AddWindow({
 			"ID": mainwidget.ID_WINDOW_MAIN,
 			"WindowTitle": "Media Pool Navigator Pro!",
-			"FixedSize": [500,90],
-			"Events": {"Close": True},
+			"FixedSize": [500,200],
+			"Events": {"Close": True, "KeyRelease": True,},
 		}, [main_widget.layout()])
 
 	wnd_main.On[mainwidget.ID_WINDOW_MAIN].Close = _on_main_closed

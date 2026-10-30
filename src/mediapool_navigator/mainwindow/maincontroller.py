@@ -8,6 +8,7 @@ from .. import __VERSION__, URL_GITHUB, URL_DONATE
 from ..bookmarks import MPIBookmarkManager
 from ..bookmarks import MPIBookmarkCallbacks
 from mediapoolinput import MPILineEditCallbacks, MPILineEditController
+from .mainwidget import ID_WINDOW_MAIN
 
 from resolvecommon import folders
 
@@ -46,7 +47,7 @@ class MPNMainController:
 
 			self.set_ready(True)
 
-	def _update_combo_choices(self, folder):
+	def _update_combo_choices(self, folder:dvrtypes.Folder):
 
 		if self._combo_options == self._media_pool_input_controller.current_folder_info().subfolder_paths():
 			return
@@ -67,9 +68,26 @@ class MPNMainController:
 		window_handle.On[self._main_widget.media_pool_path_editor().ID].ReturnPressed = self._on_go_button_clicked
 
 		window_handle.On[self._main_widget.button_add_bookmark().ID].Clicked          = self._on_add_bookmark
+		window_handle.On[window_handle.ID].KeyRelease                                 = self._on_key_released
+
+		print(window_handle.On[window_handle.ID].KeyRelease)
 
 		self._media_pool_input_controller.register_window_handle(window_handle)
 		self._bookmarks_controller.register_window_handle(window_handle)
+
+	def _on_key_released(self, event:dict):
+
+		if not self._main_widget.bookmark_list_view().HasFocus():
+			return
+
+		if event["IsAutoRepeat"] or not event["Key"] == 16777223:
+			return
+
+		try:
+			self._bookmarks_controller.remove_folder_path(self._bookmarks_controller.selected_folder_path())
+		except ValueError as e:
+			print(e)
+
 
 	def _on_path_validity_changed(self, is_valid:bool):
 

@@ -38,6 +38,28 @@ class MPIBookmarkManager:
 
 			item.Selected = item.Text[0] == folder_path
 
+	def remove_folder_path(self, folder_path:str):
+		"""Remove a giveni folder path"""
+
+		for idx in range(self._tree_bookmarks.TopLevelItemCount()):
+
+			if self._tree_bookmarks.TopLevelItem(idx).Text[0] == folder_path:
+
+				self._tree_bookmarks.TakeTopLevelItem(idx)
+				return
+
+		raise ValueError("Path not found in list:", folder_path)
+
+	def selected_folder_path(self) -> str|None:
+		"""Get the currently selected folder path, or `None`"""
+
+		selected_indexes = list(self._tree_bookmarks.SelectedItems().values())
+
+		if not selected_indexes:
+			return None
+
+		return selected_indexes[0].Text[0]
+
 	def folder_paths(self) -> list[str]:
 		"""A list of current folder paths"""
 
@@ -49,20 +71,9 @@ class MPIBookmarkManager:
 
 		self._send_callback(MPIBookmarkCallbacks.FOLDER_HIGHLIGHTED, event["item"].Text[0])
 
-#		index = self._tree_bookmarks.IndexOfTopLevelItem(event["item"])
-#		folder = self._media_pool_input_controller.current_folder_info().subfolder_handles()[index]
-#		self._media_pool_input_controller.set_path_from_folder(folder)
-
 	def _on_folder_chosen(self, event:dict):
 
 		self._send_callback(MPIBookmarkCallbacks.FOLDER_CHOSEN, event["item"].Text[0])
-
-#		index = self._main_widget.bookmark_list_view().IndexOfTopLevelItem(event["item"])
-#
-#		folder = self._media_pool_input_controller.current_folder_info().subfolder_handles()[index]
-#		self._media_pool_input_controller.set_path_from_folder(folder)
-#		mp = resolve.GetProjectManager().GetCurrentProject().GetMediaPool()
-#		mp.SetCurrentFolder(folder)
 
 	def register_callback(self, callback:MPIBookmarkCallbacks, callback_function:typing.Callable):
 		"""Register a callback function"""
