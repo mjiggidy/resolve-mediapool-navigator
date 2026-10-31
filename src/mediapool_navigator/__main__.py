@@ -47,6 +47,16 @@ def main(bmd:typing.Any, resolve:dvrtypes.Resolve, fusion:dvrtypes.Fusion):
 	app.register_window_handle(wnd_main)
 	wnd_main.RecalcLayout()
 
+	try:
+		start_folder = resolve.GetProjectManager().GetCurrentProject().GetMediaPool().GetCurrentFolder()
+
+		if start_folder:
+			app.set_path_from_folder(start_folder)
+
+	except Exception as e:
+
+		print("Didn't set start folder: ", e)
+
 	settings = dict()
 	
 	try:

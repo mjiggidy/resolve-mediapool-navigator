@@ -35,13 +35,14 @@ class MPNMainController:
 
 		self._combo_options:list[str] = []
 
-		start_folder = self._resolve_project_manager.GetCurrentProject().GetMediaPool().GetCurrentFolder()
 
-		if start_folder:
+	def set_path_from_folder(self, folder:dvrtypes.Folder):
 
 			self.set_ready(False)
+
 			try:
-				self._media_pool_input_controller.set_path_from_folder(start_folder)
+				self._media_pool_input_controller.set_path_from_folder(folder)
+
 			except Exception as e:
 				print(e)
 
@@ -108,14 +109,12 @@ class MPNMainController:
 
 	def _on_set_current_button_clicked(self, event:dict):
 
-		self.set_ready(False)
-
 		current_folder = self._resolve_project_manager.GetCurrentProject().GetMediaPool().GetCurrentFolder()
-
+		
 		if current_folder:
-			self._media_pool_input_controller.set_path_from_folder(current_folder)
+			self.set_path_from_folder(current_folder)
 
-		self.set_ready(True)
+		
 		self._main_widget._txt_media_pool_path.SetFocus("OtherFocusReason")
 
 	def _on_go_button_clicked(self, event:dict):
