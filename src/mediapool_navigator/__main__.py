@@ -1,6 +1,6 @@
 import json, sys, typing
 from .mainwindow import maincontroller, mainwidget
-from resolvecommon import userpaths
+from resolvecommon import userpaths, folders
 
 if typing.TYPE_CHECKING:
 	import DaVinciResolveScript as dvrtypes
@@ -14,6 +14,7 @@ def main(bmd:typing.Any, resolve:dvrtypes.Resolve, fusion:dvrtypes.Fusion):
 	dispatcher = bmd.UIDispatcher(fusion.UIManager)
 
 	def _on_main_closed(event:dict):
+		"""Clean up 'n' close"""
 
 		settings = {
 			"Bookmarks" : app.bookmarks_controller().folder_paths()
@@ -45,13 +46,15 @@ def main(bmd:typing.Any, resolve:dvrtypes.Resolve, fusion:dvrtypes.Fusion):
 	wnd_main.On[mainwidget.ID_WINDOW_MAIN].Close = _on_main_closed
 
 	app.register_window_handle(wnd_main)
-	wnd_main.RecalcLayout()
+#	wnd_main.RecalcLayout()
 
 	try:
+		
 		start_folder = resolve.GetProjectManager().GetCurrentProject().GetMediaPool().GetCurrentFolder()
+		start_path   = folders.get_path_from_folder(start_folder, relative_to=resolve.GetProjectManager().GetCurrentProject().GetMediaPool().GetRootFolder()).strip("/Master/")
 
 		if start_folder:
-			app.set_path_from_folder(start_folder)
+			app._media_pool_input_controller.set_path_from_text(start_path, show_autocomplete=False)
 
 	except Exception as e:
 

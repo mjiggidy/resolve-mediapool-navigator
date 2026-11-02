@@ -22,18 +22,21 @@ class MPNMainController:
 
 		self._resolve_project_manager = project_manager
 		self._main_widget = main_widget
+		self._combo_options:list[str] = []
 
 		self.set_info_label(version_string=__VERSION__, github_url=URL_GITHUB, donate_url=URL_DONATE)
 
 		self._media_pool_input_controller = MPILineEditController(self._resolve_project_manager, self._main_widget.media_pool_path_editor())
 		self._bookmarks_controller        = MPIBookmarkManager(self._main_widget.bookmark_list_view())
 
-		self._media_pool_input_controller.current_folder_info().register_callback(MPILineEditCallbacks.CURRENT_FOLDER_CHANGED, self._update_combo_choices)
-		self._media_pool_input_controller.current_folder_info().register_callback(MPILineEditCallbacks.PATH_VALIDITY_CHANGED, self._on_path_validity_changed)
-		self._bookmarks_controller.register_callback(MPIBookmarkCallbacks.FOLDER_HIGHLIGHTED, self._on_bookmark_highlighted)
-		self._bookmarks_controller.register_callback(MPIBookmarkCallbacks.FOLDER_CHOSEN, self._on_go_button_clicked)
+		#self._update_combo_choices(self._media_pool_input_controller.current_folder_info().folder_handle())
 
-		self._combo_options:list[str] = []
+		self._media_pool_input_controller.current_folder_info().register_callback(MPILineEditCallbacks.CURRENT_FOLDER_CHANGED, self._update_combo_choices)
+		self._media_pool_input_controller.current_folder_info().register_callback(MPILineEditCallbacks.PATH_VALIDITY_CHANGED,  self._on_path_validity_changed)
+
+		self._bookmarks_controller.register_callback(MPIBookmarkCallbacks.FOLDER_HIGHLIGHTED, self._on_bookmark_highlighted)
+		self._bookmarks_controller.register_callback(MPIBookmarkCallbacks.FOLDER_CHOSEN,      self._on_go_button_clicked)
+
 
 
 	def set_path_from_folder(self, folder:dvrtypes.Folder):
@@ -95,6 +98,11 @@ class MPNMainController:
 		self._main_widget.button_add_bookmark().Enabled = is_valid
 
 	def _on_add_bookmark(self, event:dict):
+
+		if event["modifiers"]["AltModifier"]:
+			
+			self._main_widget.bookmark_list_view().Hidden = not self._main_widget.bookmark_list_view().Hidden
+			return
 
 		self._bookmarks_controller.add_folder_path(self._main_widget.media_pool_path_editor().Text)
 
