@@ -13,7 +13,8 @@ authors = [
     { name = "Michael Jordan", email = "michael@glowingpixel.com" }
 ]
 dependencies = [
-    "resolve-common @ git+https://github.com/mjiggidy/resolve_common.git@v0.2",
+    "resolve-common @ git+https://github.com/mjiggidy/resolve_common.git@v0.3",
+    "resolve-ui-mediapool-input @ git+https://github.com/mjiggidy/resolve-ui-mediapool-input.git@v0.2",
 ]
 
 [tool.setuptools.packages.find]
