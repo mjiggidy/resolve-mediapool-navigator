@@ -45,7 +45,10 @@ def main(bmd:typing.Any, resolve:dvrtypes.Resolve, fusion:dvrtypes.Fusion):
 	wnd_main.On[mainwidget.ID_WINDOW_MAIN].Close = _on_main_closed
 
 	app.register_window_handle(wnd_main)
-	wnd_main.RecalcLayout()
+#	wnd_main.RecalcLayout()
+
+	# Load bookmarks
+	wnd_main.Show()
 
 	settings = dict()
 	
@@ -62,7 +65,14 @@ def main(bmd:typing.Any, resolve:dvrtypes.Resolve, fusion:dvrtypes.Fusion):
 		for folder_path in reversed(settings["Bookmarks"]):
 			app.bookmarks_controller().add_folder_path(folder_path)
 
-	wnd_main.Show()
+	# Set current folder
+	try:
+		start_folder = resolve.GetProjectManager().GetCurrentProject().GetMediaPool().GetCurrentFolder()
+		if start_folder:
+			app.set_current_folder(start_folder)
+	except Exception as e:
+		print("Not setting folder: ", e, file=sys.stderr)
+
 
 	dispatcher.RunLoop()
 

@@ -35,17 +35,17 @@ class MPNMainController:
 
 		self._combo_options:list[str] = []
 
-		start_folder = self._resolve_project_manager.GetCurrentProject().GetMediaPool().GetCurrentFolder()
-
-		if start_folder:
-
-			self.set_ready(False)
-			try:
-				self._media_pool_input_controller.set_path_from_folder(start_folder)
-			except Exception as e:
-				print(e)
-
-			self.set_ready(True)
+#		start_folder = self._resolve_project_manager.GetCurrentProject().GetMediaPool().GetCurrentFolder()
+#
+#		if start_folder:
+#
+#			self.set_ready(False)
+#			try:
+#				self._media_pool_input_controller.set_path_from_folder(start_folder)
+#			except Exception as e:
+#				print(e)
+#
+#			self.set_ready(True)
 
 	def _update_combo_choices(self, folder:dvrtypes.Folder):
 
@@ -60,6 +60,12 @@ class MPNMainController:
 		self._main_widget.media_pool_path_combo().AddItems(self._combo_options)
 
 		self._main_widget.media_pool_path_editor().Text = user_text
+
+	def set_current_folder(self, folder:dvrtypes.Folder):
+
+		self.set_ready(False)
+		self._media_pool_input_controller.set_path_from_folder(folder)
+		self.set_ready(True)
 
 	def register_window_handle(self, window_handle:object):
 
