@@ -35,18 +35,6 @@ class MPNMainController:
 
 		self._combo_options:list[str] = []
 
-#		start_folder = self._resolve_project_manager.GetCurrentProject().GetMediaPool().GetCurrentFolder()
-#
-#		if start_folder:
-#
-#			self.set_ready(False)
-#			try:
-#				self._media_pool_input_controller.set_path_from_folder(start_folder)
-#			except Exception as e:
-#				print(e)
-#
-#			self.set_ready(True)
-
 	def _update_combo_choices(self, folder:dvrtypes.Folder):
 
 		if self._combo_options == self._media_pool_input_controller.current_folder_info().subfolder_paths():
@@ -63,9 +51,7 @@ class MPNMainController:
 
 	def set_current_folder(self, folder:dvrtypes.Folder):
 
-		self.set_ready(False)
 		self._media_pool_input_controller.set_path_from_folder(folder)
-		self.set_ready(True)
 
 	def register_window_handle(self, window_handle:object):
 
@@ -83,16 +69,26 @@ class MPNMainController:
 
 	def _on_key_released(self, event:dict):
 
-		if not self._main_widget.bookmark_list_view().HasFocus():
+		if event["IsAutoRepeat"] or not self._main_widget.bookmark_list_view().HasFocus():
 			return
 
-		if event["IsAutoRepeat"] or not event["Key"] == 16777223:
-			return
+		if event["Key"] == 16777223:
 
-		try:
-			self._bookmarks_controller.remove_folder_path(self._bookmarks_controller.selected_folder_path())
-		except ValueError as e:
-			print(e)
+			try:
+				self._bookmarks_controller.remove_folder_path(self._bookmarks_controller.selected_folder_path())
+			except ValueError as e:
+				print(e)
+
+		elif event["Key"] == 16777235 and event["Modifiers"]["AltModifier"]: # Alt+Up
+			print("Alt + Up")
+			self._bookmarks_controller.reorder_selection()
+
+		elif event["Key"] == 16777237 and event["Modifiers"]["AltModifier"]: # Alt+Down
+			print("Alt + Down")
+			self._bookmarks_controller.reorder_selection(move_up=False)
+		
+		else:
+			print(event)
 
 
 	def _on_path_validity_changed(self, is_valid:bool):
@@ -105,23 +101,15 @@ class MPNMainController:
 
 	def _on_bookmark_highlighted(self, folder_path:str):
 
-#		self.set_ready(False)
 		self._media_pool_input_controller.set_path_from_text(folder_path)
 
-#		self.set_ready(True)
-
-#		self._main_widget.media_pool_path_combo().SetFocus()
-
 	def _on_set_current_button_clicked(self, event:dict):
-
-		self.set_ready(False)
-
+		
 		current_folder = self._resolve_project_manager.GetCurrentProject().GetMediaPool().GetCurrentFolder()
 
 		if current_folder:
 			self._media_pool_input_controller.set_path_from_folder(current_folder)
 
-		self.set_ready(True)
 		self._main_widget._txt_media_pool_path.SetFocus("OtherFocusReason")
 
 	def _on_go_button_clicked(self, event:dict):

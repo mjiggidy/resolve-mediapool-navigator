@@ -13,6 +13,41 @@ class MPIBookmarkManager:
 		for callback in MPIBookmarkCallbacks:
 			self._callbacks[callback] = []
 
+	def reorder_selection(self, move_up:bool=True):
+		"""Move an item up (default) or down"""
+
+		selected_items = list(self._tree_bookmarks.SelectedItems().values())
+		
+		if not selected_items:
+			
+			print("Nothing selected")
+			return
+		
+		current_item = selected_items[0]
+		print("Current item text is", current_item.Text[0])
+
+		selected_index = self._tree_bookmarks.IndexOfTopLevelItem(current_item)
+		if move_up and selected_index == 0:
+			
+			print("Item is already first")
+			return
+
+		elif not move_up and selected_index == self._tree_bookmarks.TopLevelItemCount()-1:
+			
+			print("Item is already last")
+			return
+
+		new_index = selected_index + (-1 if move_up else 1)
+
+		print(f"Moving {selected_index} to after {new_index}")
+		
+		item = self._tree_bookmarks.TakeTopLevelItem(selected_index)
+		self._tree_bookmarks.InsertTopLevelItem(new_index, item)
+		
+#		self._tree_bookmarks.TopLevelItem(selected_index).Selected = False
+		self.select_folder_path(item.Text[0])
+
+
 	def register_window_handle(self, window_handle:object):
 		"""Register `TextEdited` event with dispatcher window handle"""
 		
@@ -53,12 +88,9 @@ class MPIBookmarkManager:
 	def selected_folder_path(self) -> str|None:
 		"""Get the currently selected folder path, or `None`"""
 
-		selected_indexes = list(self._tree_bookmarks.SelectedItems().values())
+		selected_items = list(self._tree_bookmarks.SelectedItems().values())
 
-		if not selected_indexes:
-			return None
-
-		return selected_indexes[0].Text[0]
+		return selected_items[0].Text[0] if selected_items else None
 
 	def folder_paths(self) -> list[str]:
 		"""A list of current folder paths"""
