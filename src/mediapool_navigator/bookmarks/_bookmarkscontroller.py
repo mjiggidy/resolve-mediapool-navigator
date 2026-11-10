@@ -16,37 +16,39 @@ class MPIBookmarkManager:
 	def reorder_selection(self, move_up:bool=True):
 		"""Move an item up (default) or down"""
 
-		selected_items = list(self._tree_bookmarks.SelectedItems().values())
-		
-		if not selected_items:
+		try:
+			selected_item = next(iter(self._tree_bookmarks.SelectedItems().values()))
+	
+		except Exception as e:
 			
-			print("Nothing selected")
+			# No items or somehow no selection
 			return
 		
-		current_item = selected_items[0]
-		print("Current item text is", current_item.Text[0])
+		selected_index = self._tree_bookmarks.IndexOfTopLevelItem(selected_item)
+		selected_text  = selected_item.Text[0]
 
-		selected_index = self._tree_bookmarks.IndexOfTopLevelItem(current_item)
-		if move_up and selected_index == 0:
+		dest_index = max(0, selected_index-1) if move_up else min(self._tree_bookmarks.TopLevelItemCount()-1, selected_index+1)
+
+		if selected_index == dest_index:
 			
-			print("Item is already first")
+			print("Not moving")
 			return
 
-		elif not move_up and selected_index == self._tree_bookmarks.TopLevelItemCount()-1:
-			
-			print("Item is already last")
-			return
+		dest_item = self._tree_bookmarks.TopLevelItem(dest_index)
+		dest_text = dest_item.Text[0]
 
-		new_index = selected_index + (-1 if move_up else 1)
+		# NOTE TO SELF ABOUT ALL THIS:
+		# Swapping the text of the items isn't my favorite plan of attack, but there's a lot of weirdness 
+		# around selected items and "current item" stuff that just doesn't seem to work out well 
+		# if you swap the actual item objects.
 
-		print(f"Moving {selected_index} to after {new_index}")
-		
-		item = self._tree_bookmarks.TakeTopLevelItem(selected_index)
-		self._tree_bookmarks.InsertTopLevelItem(new_index, item)
-		
-#		self._tree_bookmarks.TopLevelItem(selected_index).Selected = False
-		self.select_folder_path(item.Text[0])
+		dest_item    .Text[0] = selected_text
+		selected_item.Text[0] = dest_text
 
+		selected_item.Selected = False
+		dest_item    .Selected = True
+
+		self._tree_bookmarks.ScrollToItem(dest_item)
 
 	def register_window_handle(self, window_handle:object):
 		"""Register `TextEdited` event with dispatcher window handle"""
