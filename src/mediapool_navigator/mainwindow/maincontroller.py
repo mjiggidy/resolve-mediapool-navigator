@@ -15,6 +15,9 @@ from resolvecommon import folders
 if typing.TYPE_CHECKING:
 	import DaVinciResolveScript as dvrtypes
 
+PREVENT_INVALID_BOOKMARKS = False
+"""Prevent or allow the user to add invalid media pool paths"""
+
 class MPNMainController:
 	"""Main application controller"""
 
@@ -89,7 +92,8 @@ class MPNMainController:
 
 	def _on_path_validity_changed(self, is_valid:bool):
 
-		self._main_widget.button_add_bookmark().Enabled = is_valid
+		if PREVENT_INVALID_BOOKMARKS:
+			self._main_widget.button_add_bookmark().Enabled = is_valid
 
 	def _on_add_bookmark(self, event:dict):
 
