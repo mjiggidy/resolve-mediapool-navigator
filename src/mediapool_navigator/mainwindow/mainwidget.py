@@ -63,6 +63,7 @@ class MPNMainWindow(MPNAbstractWidget):
 			"AlternatingRowColors":True,
 			"RootIsDecorated": False,
 			"HeaderHidden":True,
+			"UniformRowHeights":True,
 			"Events": {
 				"ItemActivated": True,
 				"ItemClicked": True,
