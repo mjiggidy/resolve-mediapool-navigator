@@ -79,17 +79,13 @@ class MPNMainController:
 			except ValueError as e:
 				print(e)
 
-		elif event["Key"] == 16777235 and event["Modifiers"]["AltModifier"]: # Alt+Up
-			print("Alt + Up")
+		elif event["Key"] == 16777235 and event["Modifiers"]["ShiftModifier"]: # Alt+Up
+
 			self._bookmarks_controller.reorder_selection()
 
-		elif event["Key"] == 16777237 and event["Modifiers"]["AltModifier"]: # Alt+Down
-			print("Alt + Down")
-			self._bookmarks_controller.reorder_selection(move_up=False)
-		
-		else:
-			print(event)
+		elif event["Key"] == 16777237 and event["Modifiers"]["ShiftModifier"]: # Alt+Down
 
+			self._bookmarks_controller.reorder_selection(move_up=False)
 
 	def _on_path_validity_changed(self, is_valid:bool):
 
