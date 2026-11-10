@@ -110,11 +110,11 @@ class MPNMainController:
 
 	def _on_go_button_clicked(self, event:dict):
 
-		self.set_ready(False)
+#		self.set_ready(False)
 
 		mp = self._resolve_project_manager.GetCurrentProject().GetMediaPool()
 
-		folder_path = self._main_widget._txt_media_pool_path.Text
+		folder_path = self._main_widget.media_pool_path_editor().Text
 
 		try:
 
@@ -129,7 +129,7 @@ class MPNMainController:
 
 			print(e)
 
-		self.set_ready(True)
+#		self.set_ready(True)
 
 		self._bookmarks_controller.select_folder_path(folder_path)
 		self._main_widget.media_pool_path_combo().SetFocus()
