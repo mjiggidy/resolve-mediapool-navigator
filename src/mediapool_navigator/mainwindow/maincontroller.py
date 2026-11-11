@@ -1,22 +1,18 @@
 from __future__ import annotations
 
-import typing
+import typing, logging
+
+from mediapoolinput import MPILineEditCallbacks, MPILineEditController
+from resolvecommon import folders
 
 from . import mainwidget
-
-from .. import __VERSION__, URL_GITHUB, URL_DONATE
-from ..bookmarks import MPIBookmarkManager
-from ..bookmarks import MPIBookmarkCallbacks
-from mediapoolinput import MPILineEditCallbacks, MPILineEditController
-from .mainwidget import ID_WINDOW_MAIN
-
-from resolvecommon import folders
+from .. import __VERSION__, URL_GITHUB, URL_DONATE, PREVENT_INVALID_BOOKMARKS
+from ..bookmarks import MPIBookmarkManager, MPIBookmarkCallbacks
 
 if typing.TYPE_CHECKING:
 	import DaVinciResolveScript as dvrtypes
 
-PREVENT_INVALID_BOOKMARKS = False
-"""Prevent or allow the user to add invalid media pool paths"""
+_logger = logging.getLogger(__name__)
 
 class MPNMainController:
 	"""Main application controller"""
@@ -31,24 +27,33 @@ class MPNMainController:
 		self._media_pool_input_controller = MPILineEditController(self._resolve_project_manager, self._main_widget.media_pool_path_editor())
 		self._bookmarks_controller        = MPIBookmarkManager(self._main_widget.bookmark_list_view())
 
-		self._media_pool_input_controller.current_folder_info().register_callback(MPILineEditCallbacks.CURRENT_FOLDER_CHANGED, self._update_combo_choices)
+		self._media_pool_input_controller.current_folder_info().register_callback(MPILineEditCallbacks.CURRENT_FOLDER_CHANGED, self._on_current_folder_changed)
 		self._media_pool_input_controller.current_folder_info().register_callback(MPILineEditCallbacks.PATH_VALIDITY_CHANGED, self._on_path_validity_changed)
+		
 		self._bookmarks_controller.register_callback(MPIBookmarkCallbacks.FOLDER_HIGHLIGHTED, self._on_bookmark_highlighted)
 		self._bookmarks_controller.register_callback(MPIBookmarkCallbacks.FOLDER_CHOSEN, self._on_go_button_clicked)
 
-		self._combo_options:list[str] = []
+	def _combo_choices(self) -> list[str]:
+		"""Current combo box choices"""
 
-	def _update_combo_choices(self, folder:dvrtypes.Folder):
+		return [self._main_widget.media_pool_path_combo().ItemText[idx] for idx in range(self._main_widget.media_pool_path_combo().Count())]
 
-		if self._combo_options == self._media_pool_input_controller.current_folder_info().subfolder_paths():
+	def _on_current_folder_changed(self, folder:dvrtypes.Folder):
+
+		current_subfolder_paths = self._combo_choices()
+		new_subfolder_paths     = self._media_pool_input_controller.current_folder_info().subfolder_paths()
+
+		if set(current_subfolder_paths) == set(new_subfolder_paths):
+			
+			_logger.debug("Got `CURRENT_FOLDER_CHANGED`, but subfolders remain the same...")
 			return
+
+		_logger.debug("Setting new paths: %s (Currently: %s)", new_subfolder_paths, current_subfolder_paths)
 
 		user_text = self._main_widget.media_pool_path_editor().Text
 
-		self._combo_options = self._media_pool_input_controller.current_folder_info().subfolder_paths()
-
 		self._main_widget.media_pool_path_combo().Clear()
-		self._main_widget.media_pool_path_combo().AddItems(self._combo_options)
+		self._main_widget.media_pool_path_combo().AddItems(new_subfolder_paths)
 
 		self._main_widget.media_pool_path_editor().Text = user_text
 
@@ -57,15 +62,12 @@ class MPNMainController:
 		self._media_pool_input_controller.set_path_from_folder(folder)
 
 	def register_window_handle(self, window_handle:object):
-
-#		window_handle.On[mainwidget.ID_BTN_GO].Clicked          = self._on_go_button_clicked
+		
 		window_handle.On[self._main_widget.button_use_current().ID].Clicked           = self._on_set_current_button_clicked
 		window_handle.On[self._main_widget.media_pool_path_editor().ID].ReturnPressed = self._on_go_button_clicked
 
 		window_handle.On[self._main_widget.button_add_bookmark().ID].Clicked          = self._on_add_bookmark
 		window_handle.On[window_handle.ID].KeyRelease                                 = self._on_key_released
-
-		print(window_handle.On[window_handle.ID].KeyRelease)
 
 		self._media_pool_input_controller.register_window_handle(window_handle)
 		self._bookmarks_controller.register_window_handle(window_handle)
@@ -79,8 +81,9 @@ class MPNMainController:
 
 			try:
 				self._bookmarks_controller.remove_folder_path(self._bookmarks_controller.selected_folder_path())
+			
 			except ValueError as e:
-				print(e)
+				_logger.error("Error removing selected folder path from bookmarks: %s", e, exc_info=True)
 
 		elif event["Key"] == 16777235 and event["Modifiers"]["ShiftModifier"]: # Alt+Up
 
@@ -114,8 +117,6 @@ class MPNMainController:
 
 	def _on_go_button_clicked(self, event:dict):
 
-#		self.set_ready(False)
-
 		mp = self._resolve_project_manager.GetCurrentProject().GetMediaPool()
 
 		folder_path = self._main_widget.media_pool_path_editor().Text
@@ -124,22 +125,22 @@ class MPNMainController:
 
 			if folder_path.strip():
 				folder = folders.get_folder_from_path(folder_path, mp.GetRootFolder())
+			
 			else:
 				folder = mp.GetRootFolder()
 				
 			mp.SetCurrentFolder(folder)
 
 		except Exception as e:
-
-			print(e)
-
-#		self.set_ready(True)
+			_logger.error("Error setting current folder to %s: %s", folder_path, e, exc_info=True)
 
 		self._bookmarks_controller.select_folder_path(folder_path)
 		self._main_widget.media_pool_path_combo().SetFocus()
 
 
 	def set_ready(self, is_ready:bool=True):
+		"""Set ready state of the widgets"""
+		# NOTE: Currently unused
 
 		self._main_widget.button_use_current().Enabled    = is_ready
 		self._main_widget.button_add_bookmark().Enabled   = is_ready
@@ -147,6 +148,7 @@ class MPNMainController:
 		self._main_widget.bookmark_list_view().Enabled    = is_ready
 
 	def set_info_label(self, /, version_string:str, github_url:str, donate_url:str=""):
+		
 
 		parts = [
 			f"v{version_string}",
