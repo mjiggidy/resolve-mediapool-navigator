@@ -15,6 +15,10 @@ from ..suggestionsbox import MPNSuggestionsBoxController
 if typing.TYPE_CHECKING:
 	import DaVinciResolveScript as dvrtypes
 
+KEY_ARROW_UP   = 16777235
+KEY_ARROW_DOWN = 16777237
+KEY_DELETE     = 16777223
+
 _logger = logging.getLogger(__name__)
 
 class MPNMainController:
@@ -74,7 +78,7 @@ class MPNMainController:
 		if event["IsAutoRepeat"] or not self._main_widget.bookmark_list_view().HasFocus():
 			return
 
-		if event["Key"] == 16777223:
+		if event["Key"] == KEY_DELETE:
 
 			try:
 				self._bookmarks_controller.remove_folder_path(self._bookmarks_controller.selected_folder_path())
@@ -82,11 +86,11 @@ class MPNMainController:
 			except ValueError as e:
 				_logger.error("Error removing selected folder path from bookmarks: %s", e, exc_info=True)
 
-		elif event["Key"] == 16777235 and event["Modifiers"]["ShiftModifier"]: # Alt+Up
+		elif event["Key"] == KEY_ARROW_UP and event["Modifiers"]["ShiftModifier"]: # Alt+Up
 
 			self._bookmarks_controller.reorder_selection()
 
-		elif event["Key"] == 16777237 and event["Modifiers"]["ShiftModifier"]: # Alt+Down
+		elif event["Key"] == KEY_ARROW_DOWN and event["Modifiers"]["ShiftModifier"]: # Alt+Down
 
 			self._bookmarks_controller.reorder_selection(move_up=False)
 
@@ -114,11 +118,11 @@ class MPNMainController:
 
 	def _on_go_button_clicked(self, event:dict):
 
-		mp = self._resolve_project_manager.GetCurrentProject().GetMediaPool()
-
 		folder_path = self._main_widget.media_pool_path_editor().Text
 
 		try:
+			
+			mp = self._resolve_project_manager.GetCurrentProject().GetMediaPool()
 
 			if folder_path.strip():
 				folder = folders.get_folder_from_path(folder_path, mp.GetRootFolder())
@@ -146,7 +150,6 @@ class MPNMainController:
 
 	def set_info_label(self, /, version_string:str, github_url:str, donate_url:str=""):
 		
-
 		parts = [
 			f"v{version_string}",
 			f"<a href=\"{github_url}\">Github</a>",
