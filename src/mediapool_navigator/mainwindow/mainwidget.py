@@ -10,6 +10,7 @@ ID_BTN_SAVE_BOOKMARK = "btn_save_bookmark"
 ID_TREE_BOOKMARKS = "tree_subfolders"
 
 class MPNMainWindow(MPNAbstractWidget):
+	"""Main Media Pool Navigator widget"""
 
 	def __init__(self, ui_manager):
 
@@ -59,7 +60,6 @@ class MPNMainWindow(MPNAbstractWidget):
 
 		self._tree_bookmarks = self._ui.Tree({
 			"ID": ID_TREE_BOOKMARKS,
-			#"Hidden": True,
 			"AlternatingRowColors":True,
 			"RootIsDecorated": False,
 			"HeaderHidden":True,
@@ -104,13 +104,6 @@ class MPNMainWindow(MPNAbstractWidget):
 
 			self._tree_bookmarks,
 			
-#			self._ui.VGap(),
-			
-#			self._ui.Label({
-#				"Weight":0,
-#				"FrameStyle": 4,
-#			}),
-#
 			self._ui.HGroup({
 				"Weight": 0,
 			},[
