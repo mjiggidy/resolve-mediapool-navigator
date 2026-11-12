@@ -4,6 +4,7 @@ from ._callbacks import MPNBookmarksCallbacks
 _logger = logging.getLogger(__name__)
 
 class MPNBookmarksController:
+	"""Turns a `Tree` into a list of folder bookmarks"""
 
 	def __init__(self, treeview:object):
 
@@ -23,9 +24,7 @@ class MPNBookmarksController:
 		window_handle.On[self._tree_bookmarks.ID].ItemActivated = self._on_folder_chosen
 		window_handle.On[self._tree_bookmarks.ID].ItemClicked   = self._on_folder_clicked
 
-	###
 	# Callbacks
-	###
 
 	def register_callback(self, callback:MPNBookmarksCallbacks, callback_function:typing.Callable):
 		"""Register a callback function"""
@@ -49,10 +48,7 @@ class MPNBookmarksController:
 
 		self._send_callback(MPNBookmarksCallbacks.FOLDER_CHOSEN, event["item"].Text[0])
 
-	###
 	# Modify paths
-	###
-	
 
 	def folder_paths(self) -> list[str]:
 		"""A list of current folder paths"""
