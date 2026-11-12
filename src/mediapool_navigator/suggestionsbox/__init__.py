@@ -1,0 +1,1 @@
+from .suggestionscontroller import MPNSuggestionsBoxController
