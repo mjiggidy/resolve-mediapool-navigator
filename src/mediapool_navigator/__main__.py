@@ -1,5 +1,5 @@
 import json, sys, typing
-from .mainwindow import maincontroller, mainwidget
+from .app import MPNApplicationController
 from resolvecommon import userpaths
 
 if typing.TYPE_CHECKING:
@@ -10,9 +10,6 @@ PATH_CFG_USER  = PATH_USER_BASE / "config" / "user_config.json"
 PATH_LOG_USER  = PATH_USER_BASE / "logs" / "user_logs.log"
 
 def main(bmd:typing.Any, resolve:dvrtypes.Resolve, fusion:dvrtypes.Fusion):
-
-	dispatcher = bmd.UIDispatcher(fusion.UIManager)
-
 	def _on_main_closed(event:dict):
 
 		settings = {
@@ -29,26 +26,8 @@ def main(bmd:typing.Any, resolve:dvrtypes.Resolve, fusion:dvrtypes.Fusion):
 		
 		except Exception as e:
 			print("Error writing settings: ", e, file=sys.stderr)
-
-		dispatcher.ExitLoop(0)
 	
-	main_widget = mainwidget.MPNMainWindow(ui_manager=fusion.UIManager)
-	app = maincontroller.MPNMainController(project_manager=resolve.GetProjectManager(), main_widget=main_widget)
 
-	wnd_main = dispatcher.AddWindow({
-			"ID": mainwidget.ID_WINDOW_MAIN,
-			"WindowTitle": "Media Pool Navigator Pro!",
-			"FixedSize": [500,200],
-			"Events": {"Close": True, "KeyRelease": True,},
-		}, [main_widget.layout()])
-
-	wnd_main.On[mainwidget.ID_WINDOW_MAIN].Close = _on_main_closed
-
-	app.register_window_handle(wnd_main)
-#	wnd_main.RecalcLayout()
-
-	# Load bookmarks
-	wnd_main.Show()
 
 	settings = dict()
 	
@@ -60,21 +39,30 @@ def main(bmd:typing.Any, resolve:dvrtypes.Resolve, fusion:dvrtypes.Fusion):
 	except Exception as e:
 		print("Error loading settings: ", e, file=sys.stderr)
 
-	if "Bookmarks" in settings:
+	user_bookmarks = settings.get("Bookmarks", [])
 
-		for folder_path in reversed(settings["Bookmarks"]):
-			app.bookmarks_controller().add_folder_path(folder_path)
+	if not isinstance(user_bookmarks, list):
+		
+		print("User bookmarks are not in a known format.  Ignoring.", file=sys.stderr)
+		user_bookmarks = []
 
 	# Set current folder
 	try:
 		start_folder = resolve.GetProjectManager().GetCurrentProject().GetMediaPool().GetCurrentFolder()
-		if start_folder:
-			app.set_current_folder(start_folder)
+
 	except Exception as e:
+		
 		print("Not setting folder: ", e, file=sys.stderr)
+		start_folder = None
 
+	app = MPNApplicationController(
+		bmd,
+		resolve,
+		fusion,
+		bookmarks    = user_bookmarks,
+		start_folder = start_folder,
+	)
 
-	dispatcher.RunLoop()
 
 
 if __name__ == "__main__":

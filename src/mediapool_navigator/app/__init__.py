@@ -1,0 +1,1 @@
+from .appcontroller import MPNApplicationController

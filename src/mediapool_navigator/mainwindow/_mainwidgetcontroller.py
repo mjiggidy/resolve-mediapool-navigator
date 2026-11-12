@@ -5,7 +5,7 @@ import typing, logging
 from mediapoolinput import MPILineEditCallbacks, MPILineEditController
 from resolvecommon import folders
 
-from . import mainwidget
+from . import _mainwidget
 
 from .. import __VERSION__, URL_GITHUB, URL_DONATE, PREVENT_INVALID_BOOKMARKS
 
@@ -21,10 +21,10 @@ KEY_DELETE     = 16777223
 
 _logger = logging.getLogger(__name__)
 
-class MPNMainController:
-	"""Main application controller"""
+class MPNMainWidgetController:
+	"""Main widget controller"""
 
-	def __init__(self, project_manager:dvrtypes.ProjectManager, main_widget:mainwidget.MPNMainWindow):
+	def __init__(self, project_manager:dvrtypes.ProjectManager, main_widget:_mainwidget.MPNMainWindow):
 
 		self._resolve_project_manager = project_manager
 		self._main_widget = main_widget
@@ -58,7 +58,7 @@ class MPNMainController:
 		self._suggestions_controller.set_suggestions(new_subfolder_paths)
 		self._main_widget.media_pool_path_editor().Text = user_text
 
-	def set_current_folder(self, folder:dvrtypes.Folder):
+	def set_current_path_from_folder(self, folder:dvrtypes.Folder):
 
 		self._media_pool_input_controller.set_path_from_folder(folder)
 
@@ -167,3 +167,8 @@ class MPNMainController:
 	def suggestions_box_controller(self) -> MPNSuggestionsBoxController:
 
 		return self._suggestions_controller
+
+	def main_widget(self) -> _mainwidget.MPNMainWindow:
+		"""The main widget this controller is assigned to"""
+
+		return self._main_widget
