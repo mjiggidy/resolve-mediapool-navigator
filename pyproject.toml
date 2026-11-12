@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "resolve-mediapool-navigator"
-version = "0.1.0"
+version = "0.5.0"
 description = "Media Pool Navigator for Davinci Resolve"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -14,7 +14,7 @@ authors = [
 ]
 dependencies = [
     "resolve-common @ git+https://github.com/mjiggidy/resolve_common.git@v0.3",
-    "resolve-ui-mediapool-input @ git+https://github.com/mjiggidy/resolve-ui-mediapool-input.git@v0.2",
+    "resolve-ui-mediapool-input @ git+https://github.com/mjiggidy/resolve-ui-mediapool-input.git@v0.3",
 ]
 
 [tool.setuptools.packages.find]
