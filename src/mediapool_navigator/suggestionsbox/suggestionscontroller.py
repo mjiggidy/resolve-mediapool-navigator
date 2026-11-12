@@ -3,6 +3,7 @@ import logging
 _logger = logging.getLogger(__name__)
 
 class MPNSuggestionsBoxController:
+	"""Shows folder suggestions in a given ComboBox"""
 
 	def __init__(self, combo_box:object):
 
