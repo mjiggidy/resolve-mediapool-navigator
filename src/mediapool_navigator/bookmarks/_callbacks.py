@@ -1,7 +1,7 @@
 import enum
 
-class MPIBookmarkCallbacks(enum.Enum):
-	"""Available callbacks from the Bookmark Manager"""
+class MPNBookmarksCallbacks(enum.Enum):
+	"""Available callbacks from the Bookmarks controller"""
 
 	FOLDER_HIGHLIGHTED = enum.auto()
 	"""User highlighted a folder path"""

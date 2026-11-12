@@ -6,8 +6,11 @@ from mediapoolinput import MPILineEditCallbacks, MPILineEditController
 from resolvecommon import folders
 
 from . import mainwidget
+
 from .. import __VERSION__, URL_GITHUB, URL_DONATE, PREVENT_INVALID_BOOKMARKS
-from ..bookmarks import MPIBookmarkManager, MPIBookmarkCallbacks
+
+from ..bookmarks import MPNBookmarksController, MPNBookmarksCallbacks
+from ..suggestionsbox import MPNSuggestionsBoxController
 
 if typing.TYPE_CHECKING:
 	import DaVinciResolveScript as dvrtypes
@@ -25,22 +28,18 @@ class MPNMainController:
 		self.set_info_label(version_string=__VERSION__, github_url=URL_GITHUB, donate_url=URL_DONATE)
 
 		self._media_pool_input_controller = MPILineEditController(self._resolve_project_manager, self._main_widget.media_pool_path_editor())
-		self._bookmarks_controller        = MPIBookmarkManager(self._main_widget.bookmark_list_view())
+		self._bookmarks_controller        = MPNBookmarksController(self._main_widget.bookmark_list_view())
+		self._suggestions_controller      = MPNSuggestionsBoxController(self._main_widget.media_pool_path_combo())
 
 		self._media_pool_input_controller.current_folder_info().register_callback(MPILineEditCallbacks.CURRENT_FOLDER_CHANGED, self._on_current_folder_changed)
 		self._media_pool_input_controller.current_folder_info().register_callback(MPILineEditCallbacks.PATH_VALIDITY_CHANGED, self._on_path_validity_changed)
 		
-		self._bookmarks_controller.register_callback(MPIBookmarkCallbacks.FOLDER_HIGHLIGHTED, self._on_bookmark_highlighted)
-		self._bookmarks_controller.register_callback(MPIBookmarkCallbacks.FOLDER_CHOSEN, self._on_go_button_clicked)
-
-	def _combo_choices(self) -> list[str]:
-		"""Current combo box choices"""
-
-		return [self._main_widget.media_pool_path_combo().ItemText[idx] for idx in range(self._main_widget.media_pool_path_combo().Count())]
+		self._bookmarks_controller.register_callback(MPNBookmarksCallbacks.FOLDER_HIGHLIGHTED, self._on_bookmark_highlighted)
+		self._bookmarks_controller.register_callback(MPNBookmarksCallbacks.FOLDER_CHOSEN, self._on_go_button_clicked)
 
 	def _on_current_folder_changed(self, folder:dvrtypes.Folder):
 
-		current_subfolder_paths = self._combo_choices()
+		current_subfolder_paths = self._suggestions_controller.suggestions()
 		new_subfolder_paths     = self._media_pool_input_controller.current_folder_info().subfolder_paths()
 
 		if set(current_subfolder_paths) == set(new_subfolder_paths):
@@ -51,10 +50,8 @@ class MPNMainController:
 		_logger.debug("Setting new paths: %s (Currently: %s)", new_subfolder_paths, current_subfolder_paths)
 
 		user_text = self._main_widget.media_pool_path_editor().Text
-
-		self._main_widget.media_pool_path_combo().Clear()
-		self._main_widget.media_pool_path_combo().AddItems(new_subfolder_paths)
-
+		
+		self._suggestions_controller.set_suggestions(new_subfolder_paths)
 		self._main_widget.media_pool_path_editor().Text = user_text
 
 	def set_current_folder(self, folder:dvrtypes.Folder):
@@ -160,6 +157,10 @@ class MPNMainController:
 
 		self._main_widget.info_label().Text = " | ".join(parts)
 
-	def bookmarks_controller(self) -> MPIBookmarkManager:
+	def bookmarks_controller(self) -> MPNBookmarksController:
 
 		return self._bookmarks_controller
+
+	def suggestions_box_controller(self) -> MPNSuggestionsBoxController:
+
+		return self._suggestions_controller

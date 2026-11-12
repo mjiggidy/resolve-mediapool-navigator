@@ -1,16 +1,16 @@
 import typing
-from ._callbacks import MPIBookmarkCallbacks
+from ._callbacks import MPNBookmarksCallbacks
 
-class MPIBookmarkManager:
+class MPNBookmarksController:
 
 	def __init__(self, treeview:object):
 
 		self._tree_bookmarks = treeview
 
-		self._callbacks:dict[MPIBookmarkCallbacks, list[typing.Callable]] = dict()
+		self._callbacks:dict[MPNBookmarksCallbacks, list[typing.Callable]] = dict()
 
 		# Register callback types
-		for callback in MPIBookmarkCallbacks:
+		for callback in MPNBookmarksCallbacks:
 			self._callbacks[callback] = []
 
 	def reorder_selection(self, move_up:bool=True):
@@ -103,18 +103,18 @@ class MPIBookmarkManager:
 
 		#print(event["item"].Text[0])
 
-		self._send_callback(MPIBookmarkCallbacks.FOLDER_HIGHLIGHTED, event["item"].Text[0])
+		self._send_callback(MPNBookmarksCallbacks.FOLDER_HIGHLIGHTED, event["item"].Text[0])
 
 	def _on_folder_chosen(self, event:dict):
 
-		self._send_callback(MPIBookmarkCallbacks.FOLDER_CHOSEN, event["item"].Text[0])
+		self._send_callback(MPNBookmarksCallbacks.FOLDER_CHOSEN, event["item"].Text[0])
 
-	def register_callback(self, callback:MPIBookmarkCallbacks, callback_function:typing.Callable):
+	def register_callback(self, callback:MPNBookmarksCallbacks, callback_function:typing.Callable):
 		"""Register a callback function"""
 
 		self._callbacks[callback].append(callback_function)
 
-	def _send_callback(self, callback:MPIBookmarkCallbacks, args:typing.Any=None):
+	def _send_callback(self, callback:MPNBookmarksCallbacks, args:typing.Any=None):
 
 		for cb in self._callbacks[callback]:
 			cb(args)

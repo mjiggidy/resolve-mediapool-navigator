@@ -1,2 +1,2 @@
-from ._bookmarkscontroller import MPIBookmarkManager
-from ._callbacks import MPIBookmarkCallbacks
+from ._bookmarkscontroller import MPNBookmarksController
+from ._callbacks import MPNBookmarksCallbacks
