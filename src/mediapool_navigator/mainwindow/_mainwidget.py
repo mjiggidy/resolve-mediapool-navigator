@@ -54,7 +54,7 @@ class MPNMainWindow(MPNAbstractWidget):
 			"Weight": 0,
 			"FixedSize": toolbutton_size,
 			"Text": "★",
-			"ToolTip": "Save To Bookmarks",
+			"ToolTip": "Save To Bookmarks<br/>Option + Click: Toggle Bookmark Visiblity",
 			"Events": {"Clicked": True},
 		})
 
