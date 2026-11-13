@@ -105,7 +105,11 @@ class MPNMainWidgetController:
 			self.toggle_bookmark_visibility()
 
 		else:
+			
 			self._bookmarks_controller.add_folder_path(self._main_widget.media_pool_path_editor().Text)
+			
+			if self._main_widget.bookmark_list_view().Hidden:
+				self.toggle_bookmark_visibility()
 
 	def toggle_bookmark_visibility(self):
 
@@ -171,6 +175,7 @@ class MPNMainWidgetController:
 		self._main_widget.bookmark_list_view().Enabled    = is_ready
 
 	def set_info_label(self, /, version_string:str, github_url:str, donate_url:str=""):
+		"""Set details on the info label footer"""
 		
 		parts = [
 			f"v{version_string}",
@@ -183,10 +188,12 @@ class MPNMainWidgetController:
 		self._main_widget.info_label().Text = " | ".join(parts)
 
 	def bookmarks_controller(self) -> MPNBookmarksController:
+		"""Bookmarks list controller"""
 
 		return self._bookmarks_controller
 
 	def suggestions_box_controller(self) -> MPNSuggestionsBoxController:
+		"""Combo box suggestions controller"""
 
 		return self._suggestions_controller
 
