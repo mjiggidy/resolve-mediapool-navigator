@@ -83,12 +83,27 @@ class ConfigFileManager:
 
 		return user_bookmarks
 
-	def write_user_config(self, bookmarks:list[str]):
+	def bookmarks_visible(self) -> bool:
+
+		visible = self._user_config.get("bookmarks_visible", True)
+
+		if not isinstance(visible, bool):
+
+			_logger.error("Bookmark visibility not an expected bool.  Ignoring.")
+			visible = True
+
+		return visible
+
+	def write_user_config(self,
+		bookmarks:list[str],
+		bookmarks_visible:bool,
+	):
 		"""Write user config to disk"""
 
 		self._user_config.update({
 			"version"  : CURRENT_CONFIG_VERSION,
 			"bookmarks": bookmarks,
+			"bookmarks_visible": bookmarks_visible,
 		})
 
 		try:

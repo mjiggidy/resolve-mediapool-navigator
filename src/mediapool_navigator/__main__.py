@@ -15,7 +15,6 @@ PATH_LOG_USER  = PATH_USER_BASE / "logs" / "user_logs.log"
 def main(bmd:typing.Any, resolve:dvrtypes.Resolve, fusion:dvrtypes.Fusion):
 
 	user_config_manager = user_config.ConfigFileManager(PATH_CFG_USER)
-	user_bookmarks = user_config_manager.bookmarks()
 
 	try:
 		start_folder = resolve.GetProjectManager().GetCurrentProject().GetMediaPool().GetCurrentFolder()
@@ -29,12 +28,14 @@ def main(bmd:typing.Any, resolve:dvrtypes.Resolve, fusion:dvrtypes.Fusion):
 		bmd,
 		resolve,
 		fusion,
-		bookmarks    = user_bookmarks,
-		start_folder = start_folder,
+		start_folder      = start_folder,
+		bookmarks         = user_config_manager.bookmarks(),
+		bookmarks_visible = user_config_manager.bookmarks_visible(),
 	)
 
 	user_config_manager.write_user_config(
-		bookmarks = app.main_controller().bookmarks_controller().folder_paths()
+		bookmarks = app.main_controller().bookmarks_controller().folder_paths(),
+		bookmarks_visible = not app.main_controller().main_widget().bookmark_list_view().Hidden,
 	)
 
 if __name__ == "__main__":

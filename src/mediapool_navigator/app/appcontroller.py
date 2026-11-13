@@ -17,6 +17,7 @@ class MPNApplicationController:
 		fusion:dvrtypes.Fusion,
 		/,
 		bookmarks:list[str]|None = None,
+		bookmarks_visible:bool = True,
 		start_folder:dvrtypes.Folder|None = None,
 	):
 
@@ -53,6 +54,9 @@ class MPNApplicationController:
 
 		if bookmarks:
 			self._setup_bookmarks(bookmarks)
+
+		if not bookmarks_visible:
+			self.main_controller().toggle_bookmark_visibility()
 
 		dispatcher.RunLoop()
 
