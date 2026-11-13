@@ -1,4 +1,4 @@
-__VERSION__ = "0.5"
+__VERSION__ = "0.6-dev"
 
 PREVENT_INVALID_BOOKMARKS = False
 """Prevent or allow the user to add invalid media pool paths"""
