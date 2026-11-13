@@ -55,7 +55,7 @@ class MPNApplicationController:
 		if bookmarks:
 			self._setup_bookmarks(bookmarks)
 
-		if not bookmarks_visible:
+		if not all((bookmarks_visible, bookmarks)):
 			self.main_controller().toggle_bookmark_visibility()
 
 		dispatcher.RunLoop()
