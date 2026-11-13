@@ -1,6 +1,6 @@
 PACKAGE_ID = "com.glowingpixel.navigator"
 
-import sys, pathlib, typing
+import sys, os, pathlib, typing
 
 if typing.TYPE_CHECKING:
 
