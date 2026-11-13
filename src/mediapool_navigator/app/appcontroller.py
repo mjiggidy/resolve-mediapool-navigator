@@ -64,3 +64,7 @@ class MPNApplicationController:
 	def _setup_start_folder(self, start_folder:dvrtypes.Folder):
 
 		self._main_controller.set_current_path_from_folder(start_folder)
+
+	def main_controller(self) -> mainwindow.MPNMainWidgetController:
+
+		return self._main_controller
