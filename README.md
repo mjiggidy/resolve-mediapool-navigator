@@ -13,7 +13,7 @@ Navigate the Media Pool by typing a path to a folder, like a real nerd!  Featuri
 
 ## Requirements
 
-- Davinci Resolve Studio 21.0.4 or newer
+- Davinci Resolve Studio 21.2 or newer
 - Python 3.11 or newer
 
 ## Installation
