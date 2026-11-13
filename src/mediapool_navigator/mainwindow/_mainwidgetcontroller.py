@@ -67,7 +67,7 @@ class MPNMainWidgetController:
 		window_handle.On[self._main_widget.button_use_current().ID].Clicked           = self._on_set_current_button_clicked
 		window_handle.On[self._main_widget.media_pool_path_editor().ID].ReturnPressed = self._on_go_button_clicked
 
-		window_handle.On[self._main_widget.button_add_bookmark().ID].Clicked          = self._on_add_bookmark
+		window_handle.On[self._main_widget.button_add_bookmark().ID].Clicked          = self._on_bookmark_button_clicked
 		window_handle.On[window_handle.ID].KeyRelease                                 = self._on_key_released
 
 		self._media_pool_input_controller.register_window_handle(window_handle)
@@ -99,9 +99,31 @@ class MPNMainWidgetController:
 		if PREVENT_INVALID_BOOKMARKS:
 			self._main_widget.button_add_bookmark().Enabled = is_valid
 
-	def _on_add_bookmark(self, event:dict):
+	def _on_bookmark_button_clicked(self, event:dict):
 
-		self._bookmarks_controller.add_folder_path(self._main_widget.media_pool_path_editor().Text)
+		if(event["modifiers"]["AltModifier"]):
+			self.toggle_bookmark_visibility()
+
+		else:
+			self._bookmarks_controller.add_folder_path(self._main_widget.media_pool_path_editor().Text)
+
+	def toggle_bookmark_visibility(self):
+
+		window_handle  = self._main_widget.bookmark_list_view().Window()
+		window_size    = list(window_handle.Size().values())
+		bookmarks_size = list(self._main_widget.bookmark_list_view().Size().values())
+
+		if self._main_widget.bookmark_list_view().Hidden:
+
+			window_handle.Resize({1: window_size[0], 2: window_size[1] + bookmarks_size[1]})
+			self._main_widget.bookmark_list_view().Hidden = False
+			window_handle.RecalcLayout()
+
+		else:
+
+			self._main_widget.bookmark_list_view().Hidden = True
+			window_handle.RecalcLayout()
+			window_handle.Resize({1: window_size[0], 2: window_size[1] - bookmarks_size[1]})
 
 	def _on_bookmark_highlighted(self, folder_path:str):
 
