@@ -69,6 +69,8 @@ class MPNBookmarksController:
 
 		self.select_folder_path(folder_path)
 
+		self._send_callback(MPNBookmarksCallbacks.FOLDER_ADDED, folder_path)
+
 	def remove_folder_path(self, folder_path:str):
 		"""Remove a given folder path"""
 
@@ -89,7 +91,12 @@ class MPNBookmarksController:
 
 		for item in (self._tree_bookmarks.TopLevelItem(idx) for idx in range(self._tree_bookmarks.TopLevelItemCount())):
 
-			item.Selected = item.Text[0] == folder_path
+			is_matched_item = item.Text[0] == folder_path
+			
+			item.Selected = is_matched_item
+			
+			if is_matched_item:
+				self._tree_bookmarks.ScrollToItem(item)
 
 	def selected_folder_path(self) -> str|None:
 		"""Get the currently selected folder path, or `None`"""

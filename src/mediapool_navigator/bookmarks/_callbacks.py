@@ -8,3 +8,6 @@ class MPNBookmarksCallbacks(enum.Enum):
 
 	FOLDER_CHOSEN      = enum.auto()
 	"""User activated a folder path"""
+
+	FOLDER_ADDED       = enum.auto()
+	"""User added a new folder"""
