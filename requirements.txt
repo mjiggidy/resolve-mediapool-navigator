@@ -1,2 +1,2 @@
-resolve_common @ git+https://github.com/mjiggidy/resolve_common.git@v0.3
+resolve_common @ git+https://github.com/mjiggidy/resolve-common.git@v0.3
 resolve-ui-mediapool-input @ git+https://github.com/mjiggidy/resolve-ui-mediapool-input.git@v0.3
