@@ -22,6 +22,18 @@ class MPNSuggestionsBoxController:
 		self._combo_box.Clear()
 		self._combo_box.AddItems(suggestions)
 
+	def highlight_suggestion(self, suggestion:str):
+
+		# NOTE: Untested, in prog
+
+		try:
+			
+			suggestion_index = self.suggestions().index(suggestion)
+			self._combo_box.SetCurrentIndex(suggestion_index)
+		
+		except ValueError as e:
+			_logger.debug("Suggestion doesn't exist: %s", suggestion)
+
 	def suggestions_box(self) -> object:
 		"""The combo box"""
 
