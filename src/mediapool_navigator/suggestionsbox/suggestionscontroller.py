@@ -27,13 +27,13 @@ class MPNSuggestionsBoxController:
 		# NOTE: Untested, in prog
 
 		try:
-			
 			suggestion_index = self.suggestions().index(suggestion)
-			self._combo_box.SetCurrentIndex(suggestion_index)
-		
+
 		except ValueError as e:
 			_logger.debug("Suggestion doesn't exist: %s", suggestion)
-
+		
+		self._combo_box.CurrentIndex = suggestion_index
+		
 	def suggestions_box(self) -> object:
 		"""The combo box"""
 
