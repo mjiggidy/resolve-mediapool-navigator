@@ -1,3 +1,4 @@
+from __future__ import annotations
 import sys, typing
 
 from mediapool_navigator.utils import user_config

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 PACKAGE_ID = "com.glowingpixel.navigator"
 
 import sys, os, pathlib, typing
