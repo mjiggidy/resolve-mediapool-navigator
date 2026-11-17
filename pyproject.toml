@@ -14,7 +14,7 @@ authors = [
 ]
 dependencies = [
     "resolve-common @ git+https://github.com/mjiggidy/resolve-common.git@v0.3",
-    "resolve-ui-mediapool-input @ git+https://github.com/mjiggidy/resolve-ui-mediapool-input.git@v0.3",
+    "resolve-ui-mediapool-input @ git+https://github.com/mjiggidy/resolve-ui-mediapool-input.git@v0.4",
 ]
 
 [tool.setuptools.packages.find]
