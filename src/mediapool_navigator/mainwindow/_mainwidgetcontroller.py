@@ -39,12 +39,12 @@ class MPNMainWidgetController:
 		self._media_pool_input_controller.current_folder_info().register_callback(MPILineEditCallbacks.PATH_VALIDITY_CHANGED, self._on_path_validity_changed)
 		
 		self._bookmarks_controller.register_callback(MPNBookmarksCallbacks.FOLDER_HIGHLIGHTED, self._on_bookmark_highlighted)
-		self._bookmarks_controller.register_callback(MPNBookmarksCallbacks.FOLDER_CHOSEN, self._on_go_button_clicked)
+		self._bookmarks_controller.register_callback(MPNBookmarksCallbacks.FOLDER_CHOSEN, self._on_path_submitted)
 
 	def _on_current_folder_changed(self, folder:dvrtypes.Folder):
 
 		current_subfolder_paths = self._suggestions_controller.suggestions()
-		new_subfolder_paths     = self._media_pool_input_controller.current_folder_info().subfolder_paths()
+		new_subfolder_paths     = self._media_pool_input_controller.current_folder_info().sub_folder_paths()
 
 		if set(current_subfolder_paths) == set(new_subfolder_paths):
 			
@@ -65,13 +65,15 @@ class MPNMainWidgetController:
 	def register_window_handle(self, window_handle:object):
 		
 		window_handle.On[self._main_widget.button_use_current().ID].Clicked           = self._on_set_current_button_clicked
-		window_handle.On[self._main_widget.media_pool_path_editor().ID].ReturnPressed = self._on_go_button_clicked
+		window_handle.On[self._main_widget.media_pool_path_editor().ID].ReturnPressed = self._on_path_submitted
+		#window_handle.On[self._main_widget.media_pool_path_combo().ID].EditTextChanged= self._on_path_edited
 
 		window_handle.On[self._main_widget.button_add_bookmark().ID].Clicked          = self._on_bookmark_button_clicked
 		window_handle.On[window_handle.ID].KeyRelease                                 = self._on_key_released
 
 		self._media_pool_input_controller.register_window_handle(window_handle)
 		self._bookmarks_controller.register_window_handle(window_handle)
+
 
 	def _on_key_released(self, event:dict):
 
@@ -112,10 +114,13 @@ class MPNMainWidgetController:
 				self.toggle_bookmark_visibility()
 
 	def toggle_bookmark_visibility(self):
+		"""Show/hide the bookmarks list"""
 
 		window_handle  = self._main_widget.bookmark_list_view().Window()
 		window_size    = list(window_handle.Size().values())
 		bookmarks_size = list(self._main_widget.bookmark_list_view().Size().values())
+
+		
 
 		if self._main_widget.bookmark_list_view().Hidden:
 
@@ -142,7 +147,7 @@ class MPNMainWidgetController:
 
 		self._main_widget._txt_media_pool_path.SetFocus("OtherFocusReason")
 
-	def _on_go_button_clicked(self, event:dict):
+	def _on_path_submitted(self, event:dict):
 
 		folder_path = self._main_widget.media_pool_path_editor().Text
 
