@@ -1,13 +1,11 @@
 from ..gui.abstract_widget import MPNAbstractWidget
 
-ID_WINDOW_MAIN = "com.glowingpixel.navigator.mainwindow"
-
-ID_CMB_PATH        = "cmb_mediapool_path"
-ID_TXT_PATH        = "txt_mediapool_path"
-ID_BTN_GO          = "btn_go"
-ID_BTN_SET_CURRENT = "btn_set_current"
+ID_CMB_PATH          = "cmb_mediapool_path"
+ID_TXT_PATH          = "txt_mediapool_path"
+ID_BTN_GO            = "btn_go"
+ID_BTN_SET_CURRENT   = "btn_set_current"
 ID_BTN_SAVE_BOOKMARK = "btn_save_bookmark"
-ID_TREE_BOOKMARKS = "tree_subfolders"
+ID_TREE_BOOKMARKS    = "tree_subfolders"
 
 class MPNMainWindow(MPNAbstractWidget):
 	"""Main Media Pool Navigator widget"""
