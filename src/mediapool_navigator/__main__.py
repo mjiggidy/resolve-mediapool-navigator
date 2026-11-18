@@ -1,8 +1,12 @@
-import sys, typing
+from __future__ import annotations
+
+import sys, typing, logging
 
 from mediapool_navigator.utils import user_config
 from resolvecommon import userpaths
 
+from . import ID_WINDOW_MAIN, RESOLVE_MINIMUM_VERSION
+from .utils import logs
 from .app import MPNApplicationController
 
 if typing.TYPE_CHECKING:
@@ -13,6 +17,29 @@ PATH_CFG_USER  = PATH_USER_BASE / "config" / "user_config.json"
 PATH_LOG_USER  = PATH_USER_BASE / "logs" / "user_logs.log"
 
 def main(bmd:typing.Any, resolve:dvrtypes.Resolve, fusion:dvrtypes.Fusion):
+
+	if win:= fusion.UIManager.FindWindow(ID_WINDOW_MAIN):
+
+		win.Show()
+		win.Raise()
+
+		print("Window instance already running.  There can only be one.", file=sys.stderr)
+		return
+
+	logs.setup_logging(PATH_LOG_USER)
+
+	try:
+
+		resolve_version = resolve.GetVersion()
+		logging.getLogger(__name__).debug("Resolve reports version=%s", resolve_version)
+
+		if RESOLVE_MINIMUM_VERSION > resolve_version:
+			raise RuntimeError(f"This plugin requires Resolve version {'.'.join(str(v) for v in RESOLVE_MINIMUM_VERSION)} or newer (got: {'.'.join(str(v) for v in resolve_version)})")
+
+	except Exception as e:
+
+		print("Cannot run: ", str(e), file=sys.stderr)
+		return
 
 	user_config_manager = user_config.ConfigFileManager(PATH_CFG_USER)
 

@@ -29,7 +29,7 @@ class MPNMainWidgetController:
 		self._resolve_project_manager = project_manager
 		self._main_widget = main_widget
 
-		self.set_info_label(version_string=__VERSION__, github_url=URL_GITHUB, donate_url=URL_DONATE)
+		#self.set_info_label(version_string=__VERSION__, github_url=URL_GITHUB, donate_url=URL_DONATE)
 
 		self._media_pool_input_controller = MPILineEditController(self._resolve_project_manager, self._main_widget.media_pool_path_editor())
 		self._bookmarks_controller        = MPNBookmarksController(self._main_widget.bookmark_list_view())

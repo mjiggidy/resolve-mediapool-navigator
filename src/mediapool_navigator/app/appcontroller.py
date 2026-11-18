@@ -1,11 +1,10 @@
 import typing
 
+from .. import __VERSION__, URL_GITHUB, URL_DONATE, TITLE_WINDOW, SHOW_NAG, ID_WINDOW_MAIN
 from .. import mainwindow
 
 if typing.TYPE_CHECKING:
 	import DaVinciResolveScript as dvrtypes
-
-ID_WINDOW_MAIN = "com.glowingpixel.navigator.mainwindow"
 
 class MPNApplicationController:
 	"""Set up application-specific window and settings"""
@@ -19,6 +18,8 @@ class MPNApplicationController:
 		bookmarks:list[str]|None = None,
 		bookmarks_visible:bool = True,
 		start_folder:dvrtypes.Folder|None = None,
+		show_nag:bool = SHOW_NAG,
+		window_title:str = TITLE_WINDOW,
 	):
 
 		dispatcher = bmd.UIDispatcher(fusion.UIManager)
@@ -34,7 +35,7 @@ class MPNApplicationController:
 
 		wnd_main = dispatcher.AddWindow({
 				"ID": ID_WINDOW_MAIN,
-				"WindowTitle": "Media Pool Navigator Pro!",
+				"WindowTitle": window_title,
 				"FixedSize": [500,200],
 				"Events": {"Close": True, "KeyRelease": True,},
 			}, [main_widget.layout()])
@@ -48,6 +49,12 @@ class MPNApplicationController:
 		# NOTE: Setting initial values AFTER showing the window
 		# so that window geometry isn't affected by things like
 		# long folder paths in the combo box
+
+		self._main_controller.set_info_label(
+			version_string=__VERSION__,
+			github_url=URL_GITHUB,
+			donate_url=URL_DONATE if show_nag else None
+		)
 
 		if start_folder:
 			self._setup_start_folder(start_folder)
