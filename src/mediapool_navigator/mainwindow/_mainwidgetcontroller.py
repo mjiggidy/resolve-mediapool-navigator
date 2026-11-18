@@ -120,19 +120,27 @@ class MPNMainWidgetController:
 		window_size    = list(window_handle.Size().values())
 		bookmarks_size = list(self._main_widget.bookmark_list_view().Size().values())
 
-		
+		separator_padding = self._main_widget.separator().MinimumSize[2]
 
 		if self._main_widget.bookmark_list_view().Hidden:
 
-			window_handle.Resize({1: window_size[0], 2: window_size[1] + bookmarks_size[1]})
+			new_height = window_size[1] + bookmarks_size[1] - separator_padding
+			
 			self._main_widget.bookmark_list_view().Hidden = False
+			self._main_widget.separator().Hidden = True
+			
+			window_handle.Resize({1: window_size[0], 2: new_height})
 			window_handle.RecalcLayout()
 
 		else:
-
+			
+			new_height = window_size[1] - bookmarks_size[1] + separator_padding
+			
 			self._main_widget.bookmark_list_view().Hidden = True
+			self._main_widget.separator().Hidden = False
+			
 			window_handle.RecalcLayout()
-			window_handle.Resize({1: window_size[0], 2: window_size[1] - bookmarks_size[1]})
+			window_handle.Resize({1: window_size[0], 2: new_height})
 
 	def _on_bookmark_highlighted(self, folder_path:str):
 

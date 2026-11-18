@@ -69,6 +69,13 @@ class MPNMainWindow(MPNAbstractWidget):
 				"ItemClicked": True,
 			}
 		})
+		
+		self._separator = self._ui.Label({
+			"Weight": 0,
+			"FrameStyle": 4,
+			"MinimumSize": [2, 8],
+			"Hidden": True,
+		})
 
 		self._lbl_written_by = self._ui.Label({
 			"Weight": 0,
@@ -103,6 +110,7 @@ class MPNMainWindow(MPNAbstractWidget):
 			),
 
 			self._tree_bookmarks,
+			self._separator,
 			
 			self._ui.HGroup({
 				"Weight": 0,
@@ -141,3 +149,8 @@ class MPNMainWindow(MPNAbstractWidget):
 		"""The software info label"""
 
 		return self._lbl_info
+
+	def separator(self) -> object:
+		"""The little separator `Label` thing"""
+
+		return self._separator
