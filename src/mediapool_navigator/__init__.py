@@ -5,3 +5,9 @@ PREVENT_INVALID_BOOKMARKS = False
 
 URL_GITHUB  = "https://github.com/mjiggidy/resolve-mediapool-navigator/"
 URL_DONATE  = "https://ko-fi.com/lilbinboy/"
+
+TITLE_WINDOW = "Media Pool Navigator Pro!"
+SHOW_NAG     = True
+
+ID_WINDOW_MAIN          = "com.glowingpixel.navigator.mainwindow"
+RESOLVE_MINIMUM_VERSION = [21,2,1]
