@@ -1,6 +1,8 @@
 import pathlib, logging, typing, json
 from os import PathLike
 
+from .. import SHOW_NAG
+
 _logger = logging.getLogger(__name__)
 
 CURRENT_CONFIG_VERSION = 1
@@ -35,22 +37,26 @@ class ConfigFileManager:
 
 		except PermissionError as e:
 
-			_logger.error("Error accessing config file path %s: %s", self._path_user_config, e, exc_info=True)
+			_logger.error("Error accessing config file path %s: %s", self._path_user_config, e)
+			_logger.debug("Additional info:", exc_info=True)
 			pass
 
 		except json.JSONDecodeError as e:
 
-			_logger.error("Error decoding %s: %s", self._path_user_config, e, exc_info=True)
+			_logger.error("Error decoding %s: %s", self._path_user_config, e)
+			_logger.debug("Additional info:", exc_info=True)
 			pass
 
 		except FileNotFoundError:
 
 			_logger.debug("No config file found at %s. To The Defaults!", self._path_user_config)
+			_logger.debug("Additional info:", exc_info=True)
 			pass
 
 		except Exception as e:
 
-			_logger.error("Strange error accessing %s: %s", self._path_user_config, e, exc_info=True)
+			_logger.error("Strange error accessing %s: %s", self._path_user_config, e)
+			_logger.debug("Additional info:", exc_info=True)
 			pass
 
 		# Check config version
@@ -102,6 +108,14 @@ class ConfigFileManager:
 		except:
 			return False
 
+	def show_nag(self) -> bool:
+		"""Show the little Donate nag"""
+
+		try:
+			return bool(self._user_config["show_nag"])
+		except:
+			return SHOW_NAG
+
 	def write_user_config(self,
 		bookmarks:list[str],
 		bookmarks_visible:bool,
@@ -113,6 +127,9 @@ class ConfigFileManager:
 			"bookmarks": bookmarks,
 			"bookmarks_visible": bookmarks_visible,
 		})
+
+		if not self.show_nag():
+			self._user_config["show_nag"] = True
 
 		try:
 

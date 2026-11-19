@@ -66,6 +66,7 @@ def main(bmd:typing.Any, resolve:dvrtypes.Resolve, fusion:dvrtypes.Fusion):
 		start_folder      = start_folder,
 		bookmarks         = user_config_manager.bookmarks(),
 		bookmarks_visible = user_config_manager.bookmarks_visible(),
+		show_nag          = user_config_manager.show_nag(),
 	)
 
 	user_config_manager.write_user_config(
