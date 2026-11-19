@@ -7,6 +7,9 @@ ID_BTN_SET_CURRENT   = "btn_set_current"
 ID_BTN_SAVE_BOOKMARK = "btn_save_bookmark"
 ID_TREE_BOOKMARKS    = "tree_subfolders"
 
+SIDEBAR_SIZE    = [47, 16] # Yes I love arbitrary numbers that aren't based on anything reasonable such as font metrics
+TOOLBUTTON_SIZE = [40, 20] # and do not hate doing it this way at all thanks for noticing and asking haha
+
 class MPNMainWindow(MPNAbstractWidget):
 	"""Main Media Pool Navigator widget"""
 
@@ -15,7 +18,6 @@ class MPNMainWindow(MPNAbstractWidget):
 		super().__init__(ui_manager)
 
 		font_about = self._ui.Font({"PointSize": 10})
-		toolbutton_size = [40,20]
 
 		self._lbl_master = self._ui.Label({
 			"Weight": 0,
@@ -43,14 +45,14 @@ class MPNMainWindow(MPNAbstractWidget):
 			"Weight": 0,
 			"Text": "◉",
 			"ToolTip": "Use Current Folder",
-			"FixedSize": toolbutton_size,
+			"FixedSize": TOOLBUTTON_SIZE,
 			"Events": {"Clicked": True},
 		})
 
 		self._btn_save_bookmark = self._ui.Button({
 			"ID": ID_BTN_SAVE_BOOKMARK,
 			"Weight": 0,
-			"FixedSize": toolbutton_size,
+			"FixedSize": TOOLBUTTON_SIZE,
 			"Text": "★",
 			"ToolTip": "Save To Bookmarks<br/>Option + Click: Toggle Bookmark Visiblity",
 			"Events": {"Clicked": True},
@@ -58,6 +60,7 @@ class MPNMainWindow(MPNAbstractWidget):
 
 		self._tree_bookmarks = self._ui.Tree({
 			"ID": ID_TREE_BOOKMARKS,
+			"Weight": 1,
 			"AlternatingRowColors":True,
 			"RootIsDecorated": False,
 			"HeaderHidden":True,
@@ -72,7 +75,7 @@ class MPNMainWindow(MPNAbstractWidget):
 			"Weight": 0,
 			"FrameStyle": 4,
 			"MinimumSize": [2, 8],
-			"Hidden": True,
+#			"Hidden": True,
 		})
 
 		self._lbl_written_by = self._ui.Label({
@@ -95,6 +98,57 @@ class MPNMainWindow(MPNAbstractWidget):
 			"OpenExternalLinks": True,
 		})
 
+		self._btn_up = self._ui.Button({
+			"Weight": 0,
+#			"MaximumSize": [SIDEBAR_SIZE, 32000],
+			"FixedSize": SIDEBAR_SIZE,
+			"ID": "btn_sort_up",
+			"Text": "⬆",
+			"ToolTip": "Move Bookmark Up",
+		})
+
+		self._btn_down = self._ui.Button({
+			"Weight": 0,
+#			"MaximumSize": [SIDEBAR_SIZE, 32000],
+			"FixedSize": SIDEBAR_SIZE,
+			"ID": "btn_sort_down",
+			"Text": "⬇",
+			"ToolTip": "Move Bookmark Down",
+		})
+
+		self._btn_delete = self._ui.Button({
+			"Weight": 0,
+#			"MaximumSize": [SIDEBAR_SIZE, 32000],
+			"FixedSize": SIDEBAR_SIZE,
+			"ID": "btn_sort_delete",
+			"Text": "⌦",
+			"ToolTip": "Delete Selected Bookmark",
+		})
+		self._btn_sort = self._ui.Button({
+			"Weight": 0,
+			"FixedSize": SIDEBAR_SIZE,
+			"ID": "btn_sort_alpha",
+			"Text": "⇅",
+			"ToolTip": "Sort Alphabetically",
+		})
+
+		self._bookmarks = self._ui.HGroup({
+			"ID": "lay_bookmarks"
+		}, [
+
+			self._ui.VGroup({
+			},[
+				self._btn_up,
+				self._btn_down,
+				self._btn_delete,
+				self._btn_sort,
+				self._ui.VGap(),
+			]),
+
+			self._tree_bookmarks,
+		])
+
+
 	def layout(self):
 		return self._ui.VGroup([
 			self._ui.HGroup({
@@ -107,8 +161,9 @@ class MPNMainWindow(MPNAbstractWidget):
 				]
 			),
 
-			self._tree_bookmarks,
 			self._separator,
+
+			self._bookmarks,
 			
 			self._ui.HGroup({
 				"Weight": 0,
@@ -152,3 +207,28 @@ class MPNMainWindow(MPNAbstractWidget):
 		"""The little separator `Label` thing"""
 
 		return self._separator
+
+	def bookmarks_layout(self) -> object:
+		"""Bookmarks layout with buttons and tree"""
+
+		return self._bookmarks
+
+	def bookmarks_move_up_button(self) -> object:
+		"""Move Bookmark Up Button"""
+
+		return self._btn_up
+
+	def bookmarks_move_down_button(self) -> object:
+		"""Move Bookmark Down Button"""
+
+		return self._btn_down
+
+	def bookmarks_delete_button(self) -> object:
+		"""Delete Bookmark Button"""
+
+		return self._btn_delete
+
+	def bookmarks_sort_button(self) -> object:
+		"""Delete Bookmark Button"""
+
+		return self._btn_sort
