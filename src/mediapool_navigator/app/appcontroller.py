@@ -1,6 +1,6 @@
 import typing
 
-from .. import __VERSION__, URL_GITHUB, URL_DONATE, TITLE_WINDOW, SHOW_NAG, ID_WINDOW_MAIN
+from .. import __VERSION__, URL_GITHUB, URL_DONATE, TITLE_WINDOW, SHOW_NAG, ID_WINDOW_MAIN, DEFAULT_WINDOW_SIZE
 from .. import mainwindow
 
 if typing.TYPE_CHECKING:
@@ -20,6 +20,7 @@ class MPNApplicationController:
 		start_folder:dvrtypes.Folder|None = None,
 		show_nag:bool = SHOW_NAG,
 		window_title:str = TITLE_WINDOW,
+		window_size:list[int] = DEFAULT_WINDOW_SIZE,
 	):
 
 		dispatcher = bmd.UIDispatcher(fusion.UIManager)
@@ -33,18 +34,18 @@ class MPNApplicationController:
 			main_widget=main_widget
 		)
 
-		wnd_main = dispatcher.AddWindow({
+		self._wnd_main = dispatcher.AddWindow({
 				"ID": ID_WINDOW_MAIN,
 				"WindowTitle": window_title,
-				"FixedSize": [500,200],
+				"FixedSize": window_size,
 				"Events": {"Close": True, "KeyRelease": True,},
 			}, [main_widget.layout()])
 
-		wnd_main.On[ID_WINDOW_MAIN].Close = lambda _: dispatcher.ExitLoop(0)
+		self._wnd_main.On[ID_WINDOW_MAIN].Close = lambda _: dispatcher.ExitLoop(0)
 
-		self._main_controller.register_window_handle(wnd_main)
+		self._main_controller.register_window_handle(self._wnd_main)
 
-		wnd_main.Show()
+		self._wnd_main.Show()
 
 		# NOTE: Setting initial values AFTER showing the window
 		# so that window geometry isn't affected by things like
@@ -79,3 +80,7 @@ class MPNApplicationController:
 	def main_controller(self) -> mainwindow.MPNMainWidgetController:
 
 		return self._main_controller
+
+	def window_handle(self) -> object:
+
+		return self._wnd_main

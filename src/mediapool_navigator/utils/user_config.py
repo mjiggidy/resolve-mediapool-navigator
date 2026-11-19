@@ -1,7 +1,7 @@
 import pathlib, logging, typing, json
 from os import PathLike
 
-from .. import SHOW_NAG
+from .. import SHOW_NAG, DEFAULT_WINDOW_SIZE
 
 _logger = logging.getLogger(__name__)
 
@@ -100,6 +100,17 @@ class ConfigFileManager:
 
 		return visible
 
+	def last_window_size(self) -> list[int]:
+
+		try:
+			last_window_size = self._user_config["window_size"]
+			if not all(isinstance(x, int) for x in last_window_size) or not len(last_window_size) == 2:
+				raise ValueError
+			return last_window_size
+		except Exception as e:
+			return DEFAULT_WINDOW_SIZE
+		
+
 	def debug_logs(self) -> bool:
 		"""Should logs use debug"""
 
@@ -119,6 +130,7 @@ class ConfigFileManager:
 	def write_user_config(self,
 		bookmarks:list[str],
 		bookmarks_visible:bool,
+		window_size:list[int]|None,
 	):
 		"""Write user config to disk"""
 
@@ -127,6 +139,9 @@ class ConfigFileManager:
 			"bookmarks": bookmarks,
 			"bookmarks_visible": bookmarks_visible,
 		})
+
+		if window_size:
+			self._user_config["window_size"] = window_size
 
 		if not self.show_nag():
 			self._user_config["show_nag"] = True

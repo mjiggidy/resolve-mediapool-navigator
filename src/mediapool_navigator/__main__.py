@@ -67,11 +67,13 @@ def main(bmd:typing.Any, resolve:dvrtypes.Resolve, fusion:dvrtypes.Fusion):
 		bookmarks         = user_config_manager.bookmarks(),
 		bookmarks_visible = user_config_manager.bookmarks_visible(),
 		show_nag          = user_config_manager.show_nag(),
+		window_size       = user_config_manager.last_window_size(),
 	)
 
 	user_config_manager.write_user_config(
 		bookmarks = app.main_controller().bookmarks_controller().folder_paths(),
 		bookmarks_visible = not app.main_controller().main_widget().bookmark_list_view().Hidden,
+		window_size = list(app.window_handle().Size().values())
 	)
 
 if __name__ == "__main__":
