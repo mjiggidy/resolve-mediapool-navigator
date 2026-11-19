@@ -4,7 +4,7 @@
 #define MyAppName "Resolve Media Pool Navigator"
 ;#define MyAppVersion "0.8"
 #define MyAppPublisher "GlowingPixel"
-#define MyAppURL "https://github.com/mjiggidy/resolve_mediapool_navigator/"
+#define MyAppURL "https://github.com/mjiggidy/resolve-mediapool-navigator/"
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application. Do not use the same AppId value in installers for other applications.
