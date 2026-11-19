@@ -86,7 +86,9 @@ class MPNMainWidgetController:
 				self._bookmarks_controller.remove_folder_path(self._bookmarks_controller.selected_folder_path())
 			
 			except ValueError as e:
-				_logger.error("Error removing selected folder path from bookmarks: %s", e, exc_info=True)
+				
+				_logger.error("Error removing selected folder path from bookmarks: %s", e)
+				_logger.debug("Additional info:", exc_info=True)
 
 		elif event["Key"] == KEY_ARROW_UP and event["Modifiers"]["ShiftModifier"]: # Alt+Up
 
@@ -172,7 +174,8 @@ class MPNMainWidgetController:
 			mp.SetCurrentFolder(folder)
 
 		except Exception as e:
-			_logger.error("Error setting current folder to %s: %s", folder_path, e, exc_info=True)
+			_logger.error("Error setting current folder to %s: %s", folder_path, e)
+			_logger.debug("Additional info:", exc_info=True)
 
 		self._bookmarks_controller.select_folder_path(folder_path)
 		self._main_widget.media_pool_path_combo().SetFocus()

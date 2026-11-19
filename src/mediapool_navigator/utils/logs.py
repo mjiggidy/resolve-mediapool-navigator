@@ -36,7 +36,9 @@ def setup_logging(log_file_path:str|PathLike[str]|None=None):
 		log_file_path.parent.mkdir(parents=True, exist_ok=True)
 
 	except Exception as e:
-		logging.getLogger(__name__).error("Could not create log path: %s", e, exc_info=True)
+		
+		logging.getLogger(__name__).error("Could not create log path: %s", e)
+		logging.getLogger(__name__).debug("Additional info:", exc_info=True)
 
 	else:
 		
