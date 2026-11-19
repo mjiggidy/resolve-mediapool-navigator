@@ -11,4 +11,4 @@ DEFAULT_WINDOW_SIZE = [500,200]
 SHOW_NAG     = True
 
 ID_WINDOW_MAIN          = "com.glowingpixel.navigator.mainwindow"
-RESOLVE_MINIMUM_VERSION = [21,2,1]
+RESOLVE_MINIMUM_VERSION = [21,2]
