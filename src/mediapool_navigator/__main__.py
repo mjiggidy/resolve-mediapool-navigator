@@ -27,6 +27,7 @@ def main(bmd:typing.Any, resolve:dvrtypes.Resolve, fusion:dvrtypes.Fusion):
 		return
 
 	logs.setup_logging(PATH_LOG_USER)
+	_logger = logging.getLogger(__name__)
 
 	try:
 
@@ -43,12 +44,19 @@ def main(bmd:typing.Any, resolve:dvrtypes.Resolve, fusion:dvrtypes.Fusion):
 
 	user_config_manager = user_config.ConfigFileManager(PATH_CFG_USER)
 
+	if not user_config_manager.debug_logs():
+
+		_logger.debug("No debug logs requested. Goodbye from me. :(")
+		logging.getLogger().setLevel(logging.INFO)
+
 	try:
 		start_folder = resolve.GetProjectManager().GetCurrentProject().GetMediaPool().GetCurrentFolder()
 
 	except Exception as e:
 		
-		print("Not setting folder: ", e, file=sys.stderr)
+		_logger.error("Not setting folder: %s", e)
+		_logger.debug("Additional info:", exc_info=True)
+		
 		start_folder = None
 
 	app = MPNApplicationController(

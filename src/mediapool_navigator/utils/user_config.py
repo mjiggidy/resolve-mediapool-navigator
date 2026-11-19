@@ -94,6 +94,14 @@ class ConfigFileManager:
 
 		return visible
 
+	def debug_logs(self) -> bool:
+		"""Should logs use debug"""
+
+		try:
+			return bool(self._user_config["debug_logs"])
+		except:
+			return False
+
 	def write_user_config(self,
 		bookmarks:list[str],
 		bookmarks_visible:bool,
