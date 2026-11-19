@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import typing
 
 from .. import __VERSION__, URL_GITHUB, URL_DONATE, TITLE_WINDOW, SHOW_NAG, ID_WINDOW_MAIN, DEFAULT_WINDOW_SIZE
