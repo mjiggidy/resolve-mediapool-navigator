@@ -55,7 +55,7 @@ class MPNBookmarksController:
 
 		return [self._tree_bookmarks.TopLevelItem(idx).Text[0] for idx in range(self._tree_bookmarks.TopLevelItemCount())]
 	
-	def add_folder_path(self, folder_path:str):
+	def add_folder_path(self, folder_path:str, select_added:bool=True):
 		"""Add a new folder path"""
 
 		if folder_path not in self.folder_paths():
@@ -67,7 +67,8 @@ class MPNBookmarksController:
 		else:
 			_logger.debug("Folder path %s already added", folder_path)
 
-		self.select_folder_path(folder_path)
+		if select_added:
+			self.select_folder_path(folder_path)
 
 		self._send_callback(MPNBookmarksCallbacks.FOLDER_ADDED, folder_path)
 
@@ -86,6 +87,14 @@ class MPNBookmarksController:
 		_logger.debug("Folder path not found for removal: %s", folder_path)
 
 		raise ValueError("Path not found in list:", folder_path)
+
+	def remove_selected_folder_path(self):
+		"""Convenience method: Remove selected folder"""
+
+		selected = self.selected_folder_path()
+
+		if selected:
+			self.remove_folder_path(selected)
 
 	def select_folder_path(self, folder_path:str):
 
@@ -141,3 +150,27 @@ class MPNBookmarksController:
 		dest_item    .Selected = True
 
 		self._tree_bookmarks.ScrollToItem(dest_item)
+
+	def sort_alphabetically(self, reverse=False):
+		"""Sort bookmarks alphabetically with natural sort"""
+
+		from resolvecommon import formatting
+
+		folder_paths = self.folder_paths()
+		selected_path = self.selected_folder_path()
+
+		if not folder_paths:
+
+			_logger.debug("Nothing to sort")
+			return
+
+		self._tree_bookmarks.Clear()
+
+		for folder_path in sorted(
+			folder_paths,
+			key     = formatting.format_string_for_natural_sort,
+			reverse = not reverse
+		):
+			self.add_folder_path(folder_path, False)
+
+		self.select_folder_path(selected_path)
