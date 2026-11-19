@@ -66,7 +66,11 @@ class MPNMainWidgetController:
 		
 		window_handle.On[self._main_widget.button_use_current().ID].Clicked           = self._on_set_current_button_clicked
 		window_handle.On[self._main_widget.media_pool_path_editor().ID].ReturnPressed = self._on_path_submitted
-		#window_handle.On[self._main_widget.media_pool_path_combo().ID].EditTextChanged= self._on_path_edited
+
+		window_handle.On[self._main_widget.bookmarks_move_up_button().ID].Clicked     = lambda ev: self.bookmarks_controller().reorder_selection()
+		window_handle.On[self._main_widget.bookmarks_move_down_button().ID].Clicked   = lambda ev: self.bookmarks_controller().reorder_selection(move_up=False)
+		window_handle.On[self._main_widget.bookmarks_delete_button().ID].Clicked      = lambda ev: self.bookmarks_controller().remove_selected_folder_path()
+		window_handle.On[self._main_widget.bookmarks_sort_button().ID].Clicked        = lambda ev: self.bookmarks_controller().sort_alphabetically(reverse=ev["modifiers"]["AltModifier"])
 
 		window_handle.On[self._main_widget.button_add_bookmark().ID].Clicked          = self._on_bookmark_button_clicked
 		window_handle.On[window_handle.ID].KeyRelease                                 = self._on_key_released
@@ -83,7 +87,7 @@ class MPNMainWidgetController:
 		if event["Key"] == KEY_DELETE:
 
 			try:
-				self._bookmarks_controller.remove_folder_path(self._bookmarks_controller.selected_folder_path())
+				self._bookmarks_controller.remove_selected_folder_path()
 			
 			except ValueError as e:
 				
@@ -120,16 +124,17 @@ class MPNMainWidgetController:
 
 		window_handle  = self._main_widget.bookmark_list_view().Window()
 		window_size    = list(window_handle.Size().values())
-		bookmarks_size = list(self._main_widget.bookmark_list_view().Size().values())
+		bookmarks_size = list(self._main_widget.bookmarks_layout().Size().values())
 
-		separator_padding = self._main_widget.separator().MinimumSize[2]
+#		separator_padding = self._main_widget.separator().MinimumSize[2]
+		separator_padding = 0
 
-		if self._main_widget.bookmark_list_view().Hidden:
+		if self._main_widget.bookmarks_layout().Hidden:
 
 			new_height = window_size[1] + bookmarks_size[1] - separator_padding
 			
-			self._main_widget.bookmark_list_view().Hidden = False
-			self._main_widget.separator().Hidden = True
+			self._main_widget.bookmarks_layout().Hidden = False
+#			self._main_widget.separator().Hidden = True
 			
 			window_handle.Resize({1: window_size[0], 2: new_height})
 			window_handle.RecalcLayout()
@@ -138,8 +143,8 @@ class MPNMainWidgetController:
 			
 			new_height = window_size[1] - bookmarks_size[1] + separator_padding
 			
-			self._main_widget.bookmark_list_view().Hidden = True
-			self._main_widget.separator().Hidden = False
+			self._main_widget.bookmarks_layout().Hidden = True
+#			self._main_widget.separator().Hidden = False
 			
 			window_handle.RecalcLayout()
 			window_handle.Resize({1: window_size[0], 2: new_height})
