@@ -229,3 +229,13 @@ class MPNMainWindow(MPNAbstractWidget):
 		"""Delete Bookmark Button"""
 
 		return self._btn_sort
+
+	def bookmark_buttons(self) -> tuple[object]:
+		"""Convenience method: All bookmark buttons"""
+
+		return (
+			self._btn_up,
+			self._btn_down,
+			self._btn_sort,
+			self._btn_delete,
+		)
