@@ -9,6 +9,13 @@ ID_TREE_BOOKMARKS    = "tree_subfolders"
 
 SIDEBAR_SIZE    = [47, 16] # Yes I love arbitrary numbers that aren't based on anything reasonable such as font metrics
 TOOLBUTTON_SIZE = [40, 20] # and do not hate doing it this way at all thanks for noticing and asking haha
+SEPARATOR_SIZE  = [2, 8]
+
+COMMON_SEPARATOR_PROPERTIES = {
+	"Weight": 0,
+	"FrameStyle": 4,
+	"MinimumSize": SEPARATOR_SIZE,
+}
 
 class MPNMainWindow(MPNAbstractWidget):
 	"""Main Media Pool Navigator widget"""
@@ -70,13 +77,6 @@ class MPNMainWindow(MPNAbstractWidget):
 				"ItemClicked": True,
 			}
 		})
-		
-		self._separator = self._ui.Label({
-			"Weight": 0,
-			"FrameStyle": 4,
-			"MinimumSize": [2, 8],
-#			"Hidden": True,
-		})
 
 		self._lbl_written_by = self._ui.Label({
 			"Weight": 0,
@@ -100,7 +100,6 @@ class MPNMainWindow(MPNAbstractWidget):
 
 		self._btn_up = self._ui.Button({
 			"Weight": 0,
-#			"MaximumSize": [SIDEBAR_SIZE, 32000],
 			"FixedSize": SIDEBAR_SIZE,
 			"ID": "btn_sort_up",
 			"Text": "⬆",
@@ -109,7 +108,6 @@ class MPNMainWindow(MPNAbstractWidget):
 
 		self._btn_down = self._ui.Button({
 			"Weight": 0,
-#			"MaximumSize": [SIDEBAR_SIZE, 32000],
 			"FixedSize": SIDEBAR_SIZE,
 			"ID": "btn_sort_down",
 			"Text": "⬇",
@@ -118,39 +116,43 @@ class MPNMainWindow(MPNAbstractWidget):
 
 		self._btn_delete = self._ui.Button({
 			"Weight": 0,
-#			"MaximumSize": [SIDEBAR_SIZE, 32000],
 			"FixedSize": SIDEBAR_SIZE,
 			"ID": "btn_sort_delete",
-			"Text": "⌦",
+			"Text": "✖",
 			"ToolTip": "Delete Selected Bookmark",
 		})
 		self._btn_sort = self._ui.Button({
 			"Weight": 0,
 			"FixedSize": SIDEBAR_SIZE,
 			"ID": "btn_sort_alpha",
-			"Text": "⇅",
+			"Text": "𝐀-𝐙",
 			"ToolTip": "Sort Alphabetically",
 		})
 
-		self._bookmarks = self._ui.HGroup({
-			"ID": "lay_bookmarks"
+		self._bookmarks = self._ui.VGroup({
+			"ID": "lay_bookmarks",
 		}, [
+			
+			self._ui.Label(COMMON_SEPARATOR_PROPERTIES),
 
-			self._ui.VGroup({
-			},[
-				self._btn_up,
-				self._btn_down,
-				self._btn_delete,
-				self._btn_sort,
-				self._ui.VGap(),
+			self._ui.HGroup({},[
+				self._ui.VGroup({
+					},[
+						self._btn_up,
+						self._btn_down,
+						self._btn_sort,
+						self._ui.VGap(),
+						self._btn_delete,
+					]),
+
+				self._tree_bookmarks,
 			]),
-
-			self._tree_bookmarks,
 		])
 
 
 	def layout(self):
-		return self._ui.VGroup([
+		return self._ui.VGroup({}, [
+			
 			self._ui.HGroup({
 					"Weight": 0,
 				},[
@@ -161,9 +163,9 @@ class MPNMainWindow(MPNAbstractWidget):
 				]
 			),
 
-			self._separator,
-
 			self._bookmarks,
+
+			self._ui.Label(COMMON_SEPARATOR_PROPERTIES),
 			
 			self._ui.HGroup({
 				"Weight": 0,
@@ -202,11 +204,6 @@ class MPNMainWindow(MPNAbstractWidget):
 		"""The software info label"""
 
 		return self._lbl_info
-
-	def separator(self) -> object:
-		"""The little separator `Label` thing"""
-
-		return self._separator
 
 	def bookmarks_layout(self) -> object:
 		"""Bookmarks layout with buttons and tree"""
