@@ -7,7 +7,7 @@ from resolvecommon import folders
 
 from . import _mainwidget
 
-from .. import __VERSION__, URL_GITHUB, URL_DONATE, PREVENT_INVALID_BOOKMARKS
+from .. import __VERSION__,PREVENT_INVALID_BOOKMARKS
 
 from ..bookmarks import MPNBookmarksController, MPNBookmarksCallbacks
 from ..suggestionsbox import MPNSuggestionsBoxController
@@ -78,7 +78,6 @@ class MPNMainWidgetController:
 		self._media_pool_input_controller.register_window_handle(window_handle)
 		self._bookmarks_controller.register_window_handle(window_handle)
 
-
 	def _on_key_released(self, event:dict):
 
 		if event["IsAutoRepeat"] or not self._main_widget.bookmark_list_view().HasFocus():
@@ -116,13 +115,13 @@ class MPNMainWidgetController:
 			
 			self._bookmarks_controller.add_folder_path(self._main_widget.media_pool_path_editor().Text)
 			
-			if self._main_widget.bookmark_list_view().Hidden:
+			if self._main_widget.bookmarks_layout().Hidden:
 				self.toggle_bookmark_visibility()
 
 	def toggle_bookmark_visibility(self):
 		"""Show/hide the bookmarks list"""
 
-		window_handle  = self._main_widget.bookmark_list_view().Window()
+		window_handle  = self._main_widget.bookmarks_layout().Window()
 		window_size    = list(window_handle.Size().values())
 		bookmarks_size = list(self._main_widget.bookmarks_layout().Size().values())
 
@@ -150,6 +149,8 @@ class MPNMainWidgetController:
 			window_handle.Resize({1: window_size[0], 2: new_height})
 
 	def _on_bookmark_highlighted(self, folder_path:str):
+
+		
 
 		self._media_pool_input_controller.set_path_from_text(folder_path)
 
