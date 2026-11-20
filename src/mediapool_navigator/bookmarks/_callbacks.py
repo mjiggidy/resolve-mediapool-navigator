@@ -11,3 +11,6 @@ class MPNBookmarksCallbacks(enum.Enum):
 
 	FOLDER_ADDED       = enum.auto()
 	"""User added a new folder"""
+
+	FOLDER_REMOVED     = enum.auto()
+	"""A folder was removed"""

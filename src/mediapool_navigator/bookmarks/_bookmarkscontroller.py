@@ -82,6 +82,9 @@ class MPNBookmarksController:
 				_logger.debug("Removing folder path %s", folder_path)
 
 				self._tree_bookmarks.TakeTopLevelItem(idx)
+
+				self._send_callback(MPNBookmarksCallbacks.FOLDER_REMOVED, folder_path)
+				
 				return
 
 		_logger.debug("Folder path not found for removal: %s", folder_path)
