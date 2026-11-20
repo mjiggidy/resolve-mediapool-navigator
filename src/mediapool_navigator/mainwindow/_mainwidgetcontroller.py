@@ -19,6 +19,7 @@ if typing.TYPE_CHECKING:
 KEY_ARROW_UP   = 16777235
 KEY_ARROW_DOWN = 16777237
 KEY_DELETE     = 16777223
+KEY_BACKSPACE  = 16777219
 KEY_ALT        = 16777251  # TODO: Verify on Wandows
 
 _logger = logging.getLogger(__name__)
@@ -36,6 +37,7 @@ class MPNMainWidgetController:
 		self._media_pool_input_controller = MPILineEditController(self._resolve_project_manager, self._main_widget.media_pool_path_editor())
 		self._bookmarks_controller        = MPNBookmarksController(self._main_widget.bookmark_list_view())
 		self._suggestions_controller      = MPNSuggestionsBoxController(self._main_widget.media_pool_path_combo())
+		self._button_changer              = MPNButtonChanger()
 
 		self._media_pool_input_controller.current_folder_info().register_callback(MPILineEditCallbacks.CURRENT_FOLDER_CHANGED, self._on_current_folder_changed)
 		self._media_pool_input_controller.current_folder_info().register_callback(MPILineEditCallbacks.PATH_VALIDITY_CHANGED, self._on_path_validity_changed)
@@ -45,9 +47,10 @@ class MPNMainWidgetController:
 		self._bookmarks_controller.register_callback(MPNBookmarksCallbacks.FOLDER_ADDED,  self._on_bookmark_added)
 		self._bookmarks_controller.register_callback(MPNBookmarksCallbacks.FOLDER_REMOVED, self._on_bookmark_removed)
 
-		self._button_changer = MPNButtonChanger()
-		self._button_changer.register_button(self._main_widget.bookmarks_sort_button(), MPNButtonStates.ALT, "𝐙-𝐀")
-		self._button_changer.register_button(self._main_widget.button_add_bookmark(), MPNButtonStates.ALT, "⬍")
+		self._button_changer.register_button(self._main_widget.bookmarks_sort_button(),      MPNButtonStates.ALT, "𝐙-𝐀")
+		self._button_changer.register_button(self._main_widget.button_add_bookmark(),        MPNButtonStates.ALT, "⇅")
+#		self._button_changer.register_button(self._main_widget.bookmarks_move_up_button(),   MPNButtonStates.ALT, "⥣")
+#		self._button_changer.register_button(self._main_widget.bookmarks_move_down_button(), MPNButtonStates.ALT, "⥥")
 
 	def _on_current_folder_changed(self, folder:dvrtypes.Folder):
 
@@ -109,27 +112,27 @@ class MPNMainWidgetController:
 
 		if event["Key"] == KEY_ALT:
 			self._button_changer.set_state(MPNButtonStates.NORMAL)
-
-		if not self._main_widget.bookmark_list_view().HasFocus():
 			return
-		
-		if event["Key"] == KEY_DELETE:
 
-			try:
-				self._bookmarks_controller.remove_selected_folder_path()
+		if self._main_widget.bookmark_list_view().HasFocus():
 			
-			except ValueError as e:
+			if event["Key"] in (KEY_DELETE, KEY_BACKSPACE):
+
+				try:
+					self._bookmarks_controller.remove_selected_folder_path()
 				
-				_logger.error("Error removing selected folder path from bookmarks: %s", e)
-				_logger.debug("Additional info:", exc_info=True)
+				except ValueError as e:
+					
+					_logger.error("Error removing selected folder path from bookmarks: %s", e)
+					_logger.debug("Additional info:", exc_info=True)
 
-		elif event["Key"] == KEY_ARROW_UP and event["Modifiers"]["ShiftModifier"]: # Alt+Up
+			elif event["Key"] == KEY_ARROW_UP and event["Modifiers"]["ShiftModifier"]: # Alt+Up
 
-			self._bookmarks_controller.reorder_selection()
+				self._bookmarks_controller.reorder_selection()
 
-		elif event["Key"] == KEY_ARROW_DOWN and event["Modifiers"]["ShiftModifier"]: # Alt+Down
+			elif event["Key"] == KEY_ARROW_DOWN and event["Modifiers"]["ShiftModifier"]: # Alt+Down
 
-			self._bookmarks_controller.reorder_selection(move_up=False)
+				self._bookmarks_controller.reorder_selection(move_up=False)
 
 	def _on_key_pressed(self, event:dict):
 
