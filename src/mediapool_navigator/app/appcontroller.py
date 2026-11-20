@@ -40,7 +40,7 @@ class MPNApplicationController:
 				"ID": ID_WINDOW_MAIN,
 				"WindowTitle": window_title,
 				"FixedSize": window_size,
-				"Events": {"Close": True, "KeyRelease": True,},
+				"Events": {"Close": True, "KeyPress": True, "KeyRelease": True,},
 			}, [main_widget.layout()])
 
 		self._wnd_main.On[ID_WINDOW_MAIN].Close = lambda _: dispatcher.ExitLoop(0)

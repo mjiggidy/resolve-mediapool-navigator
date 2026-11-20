@@ -11,6 +11,7 @@ from .. import __VERSION__,PREVENT_INVALID_BOOKMARKS
 
 from ..bookmarks import MPNBookmarksController, MPNBookmarksCallbacks
 from ..suggestionsbox import MPNSuggestionsBoxController
+from ..buttonchanger import MPNButtonChanger, MPNButtonStates
 
 if typing.TYPE_CHECKING:
 	import DaVinciResolveScript as dvrtypes
@@ -18,6 +19,7 @@ if typing.TYPE_CHECKING:
 KEY_ARROW_UP   = 16777235
 KEY_ARROW_DOWN = 16777237
 KEY_DELETE     = 16777223
+KEY_ALT        = 16777251  # TODO: Verify on Wandows
 
 _logger = logging.getLogger(__name__)
 
@@ -42,6 +44,10 @@ class MPNMainWidgetController:
 		self._bookmarks_controller.register_callback(MPNBookmarksCallbacks.FOLDER_CHOSEN, self._on_path_submitted)
 		self._bookmarks_controller.register_callback(MPNBookmarksCallbacks.FOLDER_ADDED,  self._on_bookmark_added)
 		self._bookmarks_controller.register_callback(MPNBookmarksCallbacks.FOLDER_REMOVED, self._on_bookmark_removed)
+
+		self._button_changer = MPNButtonChanger()
+		self._button_changer.register_button(self._main_widget.bookmarks_sort_button(), MPNButtonStates.ALT, "𝐙-𝐀")
+		self._button_changer.register_button(self._main_widget.button_add_bookmark(), MPNButtonStates.ALT, "⬍")
 
 	def _on_current_folder_changed(self, folder:dvrtypes.Folder):
 
@@ -76,6 +82,7 @@ class MPNMainWidgetController:
 
 		window_handle.On[self._main_widget.button_add_bookmark().ID].Clicked          = self._on_bookmark_button_clicked
 		window_handle.On[window_handle.ID].KeyRelease                                 = self._on_key_released
+		window_handle.On[window_handle.ID].KeyPress                                   = self._on_key_pressed
 
 		self._media_pool_input_controller.register_window_handle(window_handle)
 		self._bookmarks_controller.register_window_handle(window_handle)
@@ -97,9 +104,15 @@ class MPNMainWidgetController:
 
 	def _on_key_released(self, event:dict):
 
-		if event["IsAutoRepeat"] or not self._main_widget.bookmark_list_view().HasFocus():
+		if event["IsAutoRepeat"]:
 			return
 
+		if event["Key"] == KEY_ALT:
+			self._button_changer.set_state(MPNButtonStates.NORMAL)
+
+		if not self._main_widget.bookmark_list_view().HasFocus():
+			return
+		
 		if event["Key"] == KEY_DELETE:
 
 			try:
@@ -117,6 +130,15 @@ class MPNMainWidgetController:
 		elif event["Key"] == KEY_ARROW_DOWN and event["Modifiers"]["ShiftModifier"]: # Alt+Down
 
 			self._bookmarks_controller.reorder_selection(move_up=False)
+
+	def _on_key_pressed(self, event:dict):
+
+		if event["IsAutoRepeat"]:
+			return
+
+		if event["Key"] == KEY_ALT:
+			self._button_changer.set_state(MPNButtonStates.ALT)
+			return
 
 	def _on_path_validity_changed(self, is_valid:bool):
 
