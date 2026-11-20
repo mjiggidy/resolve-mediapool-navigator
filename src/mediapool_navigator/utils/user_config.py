@@ -143,8 +143,9 @@ class ConfigFileManager:
 		if window_size:
 			self._user_config["window_size"] = window_size
 
+		# Roll in `show_nag` if it's False
 		if not self.show_nag():
-			self._user_config["show_nag"] = True
+			self._user_config["show_nag"] = False
 
 		try:
 
