@@ -101,6 +101,7 @@ class MPNMainWindow(MPNAbstractWidget):
 		self._btn_up = self._ui.Button({
 			"Weight": 0,
 			"FixedSize": SIDEBAR_SIZE,
+			"Enabled": False,
 			"ID": "btn_sort_up",
 			"Text": "⬆",
 			"ToolTip": "Move Bookmark Up",
@@ -109,6 +110,7 @@ class MPNMainWindow(MPNAbstractWidget):
 		self._btn_down = self._ui.Button({
 			"Weight": 0,
 			"FixedSize": SIDEBAR_SIZE,
+			"Enabled": False,
 			"ID": "btn_sort_down",
 			"Text": "⬇",
 			"ToolTip": "Move Bookmark Down",
@@ -117,6 +119,7 @@ class MPNMainWindow(MPNAbstractWidget):
 		self._btn_delete = self._ui.Button({
 			"Weight": 0,
 			"FixedSize": SIDEBAR_SIZE,
+			"Enabled": False,
 			"ID": "btn_sort_delete",
 			"Text": "✖",
 			"ToolTip": "Delete Selected Bookmark",
@@ -124,6 +127,7 @@ class MPNMainWindow(MPNAbstractWidget):
 		self._btn_sort = self._ui.Button({
 			"Weight": 0,
 			"FixedSize": SIDEBAR_SIZE,
+			"Enabled": False,
 			"ID": "btn_sort_alpha",
 			"Text": "𝐀-𝐙",
 			"ToolTip": "Sort Alphabetically",

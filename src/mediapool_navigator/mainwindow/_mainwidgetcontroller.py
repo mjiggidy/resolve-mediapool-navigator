@@ -40,6 +40,8 @@ class MPNMainWidgetController:
 		
 		self._bookmarks_controller.register_callback(MPNBookmarksCallbacks.FOLDER_HIGHLIGHTED, self._on_bookmark_highlighted)
 		self._bookmarks_controller.register_callback(MPNBookmarksCallbacks.FOLDER_CHOSEN, self._on_path_submitted)
+		self._bookmarks_controller.register_callback(MPNBookmarksCallbacks.FOLDER_ADDED,  self._on_bookmark_added)
+		self._bookmarks_controller.register_callback(MPNBookmarksCallbacks.FOLDER_REMOVED, self._on_bookmark_removed)
 
 	def _on_current_folder_changed(self, folder:dvrtypes.Folder):
 
@@ -78,6 +80,21 @@ class MPNMainWidgetController:
 		self._media_pool_input_controller.register_window_handle(window_handle)
 		self._bookmarks_controller.register_window_handle(window_handle)
 
+	def _on_bookmark_added(self, folder:str):
+
+		if self._main_widget.bookmarks_layout().Hidden:
+			self.toggle_bookmark_visibility()
+
+		for btn in self._main_widget.bookmark_buttons():
+			btn.Enabled = True
+
+	def _on_bookmark_removed(self, folder:str):
+
+		if not self._bookmarks_controller.folder_paths():
+
+			for btn in self._main_widget.bookmark_buttons():
+				btn.Enabled = False
+
 	def _on_key_released(self, event:dict):
 
 		if event["IsAutoRepeat"] or not self._main_widget.bookmark_list_view().HasFocus():
@@ -114,9 +131,6 @@ class MPNMainWidgetController:
 		else:
 			
 			self._bookmarks_controller.add_folder_path(self._main_widget.media_pool_path_editor().Text)
-			
-			if self._main_widget.bookmarks_layout().Hidden:
-				self.toggle_bookmark_visibility()
 
 	def toggle_bookmark_visibility(self):
 		"""Show/hide the bookmarks list"""
