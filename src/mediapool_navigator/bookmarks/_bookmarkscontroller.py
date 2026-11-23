@@ -181,3 +181,21 @@ class MPNBookmarksController:
 			self.add_folder_path(folder_path, False)
 
 		self.select_folder_path(selected_path)
+
+	def sort_reverse(self, reverse=False):
+		"""Sort bookmarks in reverse order"""
+
+		folder_paths = self.folder_paths()
+		selected_path = self.selected_folder_path()
+
+		if not folder_paths:
+
+			_logger.debug("Nothing to sort")
+			return
+
+		self._tree_bookmarks.Clear()
+
+		for folder_path in folder_paths:
+			self.add_folder_path(folder_path, False)
+
+		self.select_folder_path(selected_path)
