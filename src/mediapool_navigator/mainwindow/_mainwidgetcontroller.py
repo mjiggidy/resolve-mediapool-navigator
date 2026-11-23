@@ -78,10 +78,10 @@ class MPNMainWidgetController:
 		window_handle.On[self._main_widget.button_use_current().ID].Clicked           = self._on_set_current_button_clicked
 		window_handle.On[self._main_widget.media_pool_path_editor().ID].ReturnPressed = self._on_path_submitted
 
-		window_handle.On[self._main_widget.bookmarks_move_up_button().ID].Clicked     = lambda ev: self.bookmarks_controller().reorder_selection()
-		window_handle.On[self._main_widget.bookmarks_move_down_button().ID].Clicked   = lambda ev: self.bookmarks_controller().reorder_selection(move_up=False)
-		window_handle.On[self._main_widget.bookmarks_delete_button().ID].Clicked      = lambda ev: self.bookmarks_controller().remove_selected_folder_path()
-		window_handle.On[self._main_widget.bookmarks_sort_button().ID].Clicked        = lambda ev: self.bookmarks_controller().sort_alphabetically(reverse=ev["modifiers"]["AltModifier"])
+		window_handle.On[self._main_widget.bookmarks_move_up_button().ID].Clicked     = lambda ev: self._bookmarks_controller.reorder_selection()
+		window_handle.On[self._main_widget.bookmarks_move_down_button().ID].Clicked   = lambda ev: self._bookmarks_controller.reorder_selection(move_up=False)
+		window_handle.On[self._main_widget.bookmarks_delete_button().ID].Clicked      = lambda ev: self._bookmarks_controller.remove_selected_folder_path()
+		window_handle.On[self._main_widget.bookmarks_sort_button().ID].Clicked        = lambda ev: self._bookmarks_controller.sort_reverse() if ev["modifiers"]["AltModifier"] else self._bookmarks_controller.sort_alphabetically()
 
 		window_handle.On[self._main_widget.button_add_bookmark().ID].Clicked          = self._on_bookmark_button_clicked
 		window_handle.On[window_handle.ID].KeyRelease                                 = self._on_key_released
