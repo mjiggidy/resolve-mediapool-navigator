@@ -164,32 +164,31 @@ class MPNMainWidgetController:
 		window_size    = list(window_handle.Size().values())
 		bookmarks_size = list(self._main_widget.bookmarks_layout().Size().values())
 
-#		separator_padding = self._main_widget.separator().MinimumSize[2]
-		separator_padding = 0
+		separator_padding = 5  # Trial and error.  Probably layout padding??
 
 		if self._main_widget.bookmarks_layout().Hidden:
 
-			new_height = window_size[1] + bookmarks_size[1] - separator_padding
+			# Show bookmarks layout
+
+			new_height = window_size[1] + bookmarks_size[1] + separator_padding
 			
 			self._main_widget.bookmarks_layout().Hidden = False
-#			self._main_widget.separator().Hidden = True
 			
 			window_handle.Resize({1: window_size[0], 2: new_height})
 			window_handle.RecalcLayout()
 
 		else:
+
+			# Hid bookmarks layout
 			
-			new_height = window_size[1] - bookmarks_size[1] + separator_padding
+			new_height = window_size[1] - bookmarks_size[1] - separator_padding
 			
 			self._main_widget.bookmarks_layout().Hidden = True
-#			self._main_widget.separator().Hidden = False
 			
 			window_handle.RecalcLayout()
 			window_handle.Resize({1: window_size[0], 2: new_height})
 
 	def _on_bookmark_highlighted(self, folder_path:str):
-
-		
 
 		self._media_pool_input_controller.set_path_from_text(folder_path)
 
