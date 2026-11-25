@@ -238,8 +238,8 @@ class MPNMainWidgetController:
 		"""Set details on the info label footer"""
 		
 		parts = [
-			f"v{version_string}",
-			f"<a href=\"{github_url}\">Github</a>",
+			f"<a href=\"{github_url}/releases/latest\">v{version_string}</a>",
+			f"<a href=\"{github_url}/wiki/\">Wiki</a>",
 		]
 
 		if donate_url:
