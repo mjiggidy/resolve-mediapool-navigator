@@ -1,12 +1,14 @@
 from __future__ import annotations
 
-import typing
+import typing, logging
 
 from .. import __VERSION__, URL_GITHUB, URL_DONATE, TITLE_WINDOW, SHOW_NAG, ID_WINDOW_MAIN, DEFAULT_WINDOW_SIZE
 from .. import mainwindow
 
 if typing.TYPE_CHECKING:
 	import DaVinciResolveScript as dvrtypes
+
+_logger = logging.getLogger(__name__)
 
 class MPNApplicationController:
 	"""Set up application-specific window and settings"""
@@ -60,12 +62,18 @@ class MPNApplicationController:
 		)
 
 		if start_folder:
+
+			_logger.debug("Setting intitial start folder to %s", str(start_folder.GetName()))
 			self._setup_start_folder(start_folder)
 
 		if bookmarks:
+
+			_logger.debug("Restoring saved bookmarks: %s", bookmarks)
 			self._setup_bookmarks(bookmarks)
 
 		if not all((bookmarks_visible, bookmarks)):
+
+			_logger.debug("Hiding bookmarks because bookmarks_visible=%s, bookmarks=%s", bool(bookmarks_visible), bool(bookmarks))
 			self.main_controller().toggle_bookmark_visibility()
 
 		dispatcher.RunLoop()
