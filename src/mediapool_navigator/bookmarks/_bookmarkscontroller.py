@@ -58,6 +58,11 @@ class MPNBookmarksController:
 	def add_folder_path(self, folder_path:str, select_added:bool=True):
 		"""Add a new folder path"""
 
+		if not folder_path.strip():
+
+			_logger.debug("Ignoring empty path")
+			return
+
 		if folder_path not in self.folder_paths():
 
 			new_item = self._tree_bookmarks.NewItem()
