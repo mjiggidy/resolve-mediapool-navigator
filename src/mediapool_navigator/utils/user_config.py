@@ -143,6 +143,10 @@ class ConfigFileManager:
 		if window_size:
 			self._user_config["window_size"] = window_size
 
+		# Roll in `debug_logs` if True
+		if self.debug_logs():
+			self._user_config["debug_logs"] = True
+
 		# Roll in `show_nag` if it's False
 		if not self.show_nag():
 			self._user_config["show_nag"] = False
