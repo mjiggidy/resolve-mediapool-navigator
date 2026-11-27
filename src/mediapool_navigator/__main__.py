@@ -46,7 +46,7 @@ def main(bmd:typing.Any, resolve:dvrtypes.Resolve, fusion:dvrtypes.Fusion):
 
 	if not user_config_manager.debug_logs():
 
-		_logger.debug("No debug logs requested. Goodbye from me. :(")
+		_logger.debug("No debug logs requested. Goodbye from me, I guess. :(")
 		logging.getLogger().setLevel(logging.INFO)
 
 	try:
