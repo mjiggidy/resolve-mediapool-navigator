@@ -93,7 +93,7 @@ class MPNMainWidgetController:
 	def _on_bookmark_added(self, folder:str):
 
 		if self._main_widget.bookmarks_layout().Hidden:
-			self.toggle_bookmark_visibility()
+			self.toggle_bookmarks_list_visibility()
 
 		for btn in self._main_widget.bookmark_buttons():
 			btn.Enabled = True
@@ -151,13 +151,13 @@ class MPNMainWidgetController:
 	def _on_bookmark_button_clicked(self, event:dict):
 
 		if(event["modifiers"]["AltModifier"]):
-			self.toggle_bookmark_visibility()
+			self.toggle_bookmarks_list_visibility()
 
 		else:
 			
 			self._bookmarks_controller.add_folder_path(self._main_widget.media_pool_path_editor().Text)
 
-	def toggle_bookmark_visibility(self):
+	def toggle_bookmarks_list_visibility(self):
 		"""Show/hide the bookmarks list"""
 
 		window_handle  = self._main_widget.bookmarks_layout().Window()
@@ -187,6 +187,11 @@ class MPNMainWidgetController:
 			
 			window_handle.RecalcLayout()
 			window_handle.Resize({1: window_size[0], 2: new_height})
+
+	def bookmarks_list_visible(self) -> bool:
+		"""Current bookmarks list visibility"""
+
+		return not self._main_widget.bookmarks_layout().Hidden
 
 	def _on_bookmark_highlighted(self, folder_path:str):
 

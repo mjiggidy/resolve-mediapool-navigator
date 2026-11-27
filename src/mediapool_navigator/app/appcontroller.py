@@ -74,7 +74,7 @@ class MPNApplicationController:
 		if not all((bookmarks_visible, bookmarks)):
 
 			_logger.debug("Hiding bookmarks because bookmarks_visible=%s, bookmarks=%s", bool(bookmarks_visible), bool(bookmarks))
-			self.main_controller().toggle_bookmark_visibility()
+			self.main_controller().toggle_bookmarks_list_visibility()
 
 		dispatcher.RunLoop()
 

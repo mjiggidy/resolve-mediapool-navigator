@@ -72,7 +72,7 @@ def main(bmd:typing.Any, resolve:dvrtypes.Resolve, fusion:dvrtypes.Fusion):
 
 	user_config_manager.write_user_config(
 		bookmarks = app.main_controller().bookmarks_controller().folder_paths(),
-		bookmarks_visible = not app.main_controller().main_widget().bookmarks_layout().Hidden,
+		bookmarks_visible = app.main_controller().bookmarks_list_visible(),
 		window_size = list(app.window_handle().Size().values())
 	)
 
