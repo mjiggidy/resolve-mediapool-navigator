@@ -130,7 +130,7 @@ class MPNMainWindow(MPNAbstractWidget):
 			"Enabled": False,
 			"ID": "btn_sort_alpha",
 			"Text": "𝐀-𝐙",
-			"ToolTip": "Sort Alphabetically",
+			"ToolTip": "Sort Alphabetically<br/>Option + Click: Reverse Sort",
 		})
 
 		self._bookmarks = self._ui.VGroup({
